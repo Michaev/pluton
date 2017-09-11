@@ -10,8 +10,8 @@ public class Configuration {
 	public static String MODE = "training";				// Stage 3 - Train AI
 	//public static String MODE = "pluton";				// Stage 4 - let's roll
 	
-	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
-	public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
+	public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
+	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1440; // Day minute intervals
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
@@ -69,7 +69,8 @@ public class Configuration {
 	// None
 	
 	// 3. Training.
-	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/XMR/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/XMR/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");

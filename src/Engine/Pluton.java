@@ -47,11 +47,11 @@ public class Pluton {
 		
 		dbHandler = new DBHandler();
 		dataHandler = new DataHandler(verbose, this);
+		restHandler_btf = new Rest_BTF();
 		dataHandler.load24HVolume(currencies);
 		
 		if(Configuration.MODE.equals("loadHistory")) {
 			HistoryLoader historyLoader = new HistoryLoader(this);
-			restHandler_btf = new Rest_BTF();
 			for(String currency: Configuration.CURRENCIES) {
 				historyLoader.load(currency);
 			}
@@ -141,6 +141,13 @@ public class Pluton {
 		missionHandler = new MissionHandler(verbose, this);
 		missionHandler.start();
 	
+	}
+	
+	public String timestampToDate(long timestamp) {
+		Date d = new Date();
+		d.setTime(timestamp);
+		
+		return d.toGMTString();
 	}
 	
 	

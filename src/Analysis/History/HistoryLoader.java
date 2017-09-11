@@ -44,6 +44,7 @@ public class HistoryLoader {
 		double gain;
 		double volume;
 		int consecutive = 0;
+		int consecutiveDuck = 0;
 		
 		boolean checkForTurning = false;
 		boolean checkForTurning2 = false;
@@ -57,6 +58,7 @@ public class HistoryLoader {
 		String[] history = new String[8];
 		
 		int count = 0;
+		int countD = 0;
 		int countC = 0;
 		
 		for(String row : rows) {
@@ -68,34 +70,34 @@ public class HistoryLoader {
 			double avgVolume = parent.dbHandler.getAverageVolume(cur1, cur2, start);
 			
 			if(avgVolume == -1) {
-				System.out.println("Not enough volume data. " + start);
+				//System.out.println("Not enough volume data. " + start);
 				continue;
 			}
 			
-			if(checkForTurning2) {
-				if(isDescending(row))
-					falsePositivesTurning2++;
-				else {
-					correctTurning2++;
-					turningFactor *= gain;
-					
-					System.out.println("Turn successful. Gain: " + turningFactor);
-				}
-				checkForTurning2 = false;
-			}
+//			if(checkForTurning2) {
+//				if(isDescending(row))
+//					falsePositivesTurning2++;
+//				else {
+//					correctTurning2++;
+//					turningFactor *= gain;
+//					
+//					System.out.println("Turn successful. Gain: " + turningFactor);
+//				}
+//				checkForTurning2 = false;
+//			}
 			
-			if(checkForTurning) {
-				if(isDescending(row)) {
-					falsePositivesTurning++;
-					checkForTurning2 = false;
-				}
-				else {
-					correctTurning++;
-					checkForTurning2 = true;
-					turningFactor = gain;
-				}
-				checkForTurning = false;
-			}
+//			if(checkForTurning) {
+//				if(isDescending(row)) {
+//					falsePositivesTurning++;
+//					checkForTurning2 = false;
+//				}
+//				else {
+//					correctTurning++;
+//					checkForTurning2 = true;
+//					turningFactor = gain;
+//				}
+//				checkForTurning = false;
+//			}
 			
 			double volumeRatio = volume / avgVolume;
 			
@@ -104,9 +106,14 @@ public class HistoryLoader {
 				System.out.println();
 			}
 			
+			if(consecutiveDuck > 0) {
+				System.out.println("Tick after duck: " + gain + " at vol " + volumeRatio);
+				System.out.println();
+			}
+			
 			if(gain > Configuration.JUMP_LIMIT && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
 				consecutive++;
-				System.out.println("Found jump above limit: " + gain + " (" + volumeRatio + ") at " + start);
+				System.out.println("Found jump above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
 //				System.out.println(history[0]);
 //				System.out.println(history[1]);
 //				System.out.println(history[2]);
@@ -119,23 +126,39 @@ public class HistoryLoader {
 				count++;
 				
 				if(consecutive > 1) {
-					System.out.println("Consecutive jump(" + consecutive + "): " + gain + " (" + volumeRatio + ") at " + start);
+					System.out.println("Consecutive jump(" + consecutive + "): " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
 					countC++;
+					
+					if(volumeRatio > Configuration.JUMP_LIMIT_VOL * 2) {
+						System.out.println("Still going up?");
+					} else {
+						System.out.println("Probably turning.");
+					}
+					
 				}
 				
-				if(previousDescending(history) > 1) {
-					System.out.println(previousDescending(history) + " desc. Turning point? : " + gain + " (" + volumeRatio + ") at " + start);
-					checkForTurning = true;
-				} 
+//				if(previousDescending(history) > 1) {
+//					System.out.println(previousDescending(history) + " desc. Turning point? : " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
+//					checkForTurning = true;
+//				} 
 			}
 			else
 				consecutive = 0;
+			
+			if(gain <= 2-(Configuration.JUMP_LIMIT) && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
+				consecutiveDuck++;
+				System.out.println("Found duck above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
+				countD++;
+			} else
+				consecutiveDuck = 0;
 			
 			history = shiftArray(history, row, 8);
 		}
 		
 		System.out.println("Total jumps: " + count);
 		System.out.println("Total consecutive: " + countC);
+
+		System.out.println("Total ducks: " + countD);
 		
 		System.out.println("Total false positives: " + falsePositivesTurning);
 		System.out.println("Total correct turn predictions: " + correctTurning);
