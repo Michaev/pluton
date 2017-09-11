@@ -47,6 +47,7 @@ public class Pluton {
 		
 		dbHandler = new DBHandler();
 		dataHandler = new DataHandler(verbose, this);
+		dataHandler.load24HVolume(currencies);
 		
 		if(Configuration.MODE.equals("loadHistory")) {
 			HistoryLoader historyLoader = new HistoryLoader(this);

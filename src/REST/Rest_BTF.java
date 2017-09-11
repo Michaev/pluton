@@ -44,4 +44,28 @@ public class Rest_BTF extends REST {
 		
 		return jsonResponse.getBody().getArray();
 	}
+	
+	public JSONArray get24HVolume(String cur1, String cur2) {
+		HttpResponse<JsonNode> jsonResponse = null;
+		
+		String url = "https://api.bitfinex.com/v2/ticker/t" + cur1 + cur2;
+		
+		System.out.println("Get 24H volume URL: " + url);
+		
+		try {
+			jsonResponse = Unirest.get(url)
+					  .header("accept", "application/json")
+					  .asJson();
+		} catch (UnirestException e) {
+			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		jsonResponse.getBody().getArray();
+		
+		return jsonResponse.getBody().getArray();
+	}
 }

@@ -83,7 +83,10 @@ public class DataHandler {
 			String cur1 = currency.split("/")[1];
 			String cur2 = currency.split("/")[2];
 			
-			this.volume24h.put(cur1 + "/" + cur2, "" + parent.dbHandler.get24HVolume(cur1, cur2));
+			//this.volume24h.put(cur1 + "/" + cur2, "" + parent.dbHandler.get24HVolume(cur1, cur2));
+			this.volume24h.put(cur1 + "/" + cur2, "" + parent.restHandler_btf.get24HVolume(cur1, cur2));
+			
+			
 		}
 	}
 	

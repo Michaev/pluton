@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Configuration {
 	
-	public static String MODE = "loadHistory";			// Stage 1 - poll historic data from exchange
+	//public static String MODE = "loadHistory";			// Stage 1 - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
-	//public static String MODE = "training";				// Stage 3 - Train AI
+	public static String MODE = "training";				// Stage 3 - Train AI
 	//public static String MODE = "pluton";				// Stage 4 - let's roll
 	
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
@@ -15,11 +15,11 @@ public class Configuration {
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1440; // Day minute intervals
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
-	public static int NUMBER_OF_DAYS_BACKLOAD = 22;
+	public static int NUMBER_OF_DAYS_BACKLOAD = 30;
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	
-	public static double JUMP_LIMIT = 1.01;
+	public static double JUMP_LIMIT = 1.008;
 	public static double JUMP_LIMIT_VOL = 5;
 	
 	// Training
@@ -69,7 +69,7 @@ public class Configuration {
 	// None
 	
 	// 3. Training.
-	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/OMG/USD", "BTF/XMR/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");

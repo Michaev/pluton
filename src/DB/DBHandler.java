@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
+
 import org.json.JSONArray;
 
 import Config.Configuration;
@@ -51,7 +53,10 @@ public class DBHandler {
 	
 	public void createDataPointsTable(String cur1, String cur2, long intervals) {
 		try {
-			String sql = " create table if not exists datapoints_" + cur1 + "_" + cur2 + "_" + intervals + " (start bigint, stop bigint, gain double, low double, high double, volume double)";
+			String sql = "drop table if exists datapoints_" + cur1 + "_" + cur2 + "_" + intervals;
+			stm.executeUpdate(sql);
+			
+			sql = " create table if not exists datapoints_" + cur1 + "_" + cur2 + "_" + intervals + " (start bigint, stop bigint, gain double, low double, high double, volume double)";
 			System.out.println("Creating data points table for " + cur1 + ", " + cur2);
 			stm.executeUpdate(sql);
 			conn.commit();
@@ -175,6 +180,37 @@ public class DBHandler {
 //
 //	}
 	
+	public double getAverageVolume(String cur1, String cur2, long stop) {
+		ResultSet res;
+		double realVolume = -1;
+		
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(stop);
+		cal.add(Calendar.DATE, -3);
+		double start = cal.getTimeInMillis();
+		
+		try {
+			String sql = "select sum(abs(amount) * price), MIN(timestamp) from history_" + cur1 + "_" + cur2 + " where timestamp > " + start + " and timestamp <= " + stop;
+			
+			res = stm.executeQuery(sql);
+			while(res.next()) {
+				
+				if(res.getDouble(2) > start + (1000 * 60 * 60 * 3))
+					return -1;
+				
+				realVolume = res.getDouble(1);
+				
+				realVolume *= (Configuration.INTERVAL_TICK_GEN / 60000);
+				realVolume /= (3 * 24 * 60); 
+			}		
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return realVolume;
+	}
+	
 	public List<String> getDataPoints(String cur1, String cur2, long intervals) {
 		
 		ResultSet res;
@@ -248,7 +284,7 @@ public class DBHandler {
 			String sql = "INSERT INTO datapoints_" + cur1 + "_" + cur2 + "_" + intervals + " (start, stop, gain, low, high, volume) values ("
 					+ start + ", " + stop + ", " + gain + ", " + low + ", " + high + ", " + volume + ")";
 		
-			System.out.println("Insert data points update :" + sql);
+			//System.out.println("Insert data points update :" + sql);
 			stm.executeUpdate(sql);
 			conn.commit();
 			
@@ -275,11 +311,11 @@ public class DBHandler {
 			res = stm.executeQuery(sql);
 			
 			while(res.next()) {
-				System.out.println("Get open");
+				//System.out.println("Get open");
 
 				data[2] = res.getDouble("OPEN");
 				
-				System.out.println("data[2]: " + data[2]);
+				//System.out.println("data[2]: " + data[2]);
 			}
 			
 			sql = "select price as CLOSE from history_" + cur1 + "_" + cur2
@@ -287,7 +323,7 @@ public class DBHandler {
 			res = stm.executeQuery(sql);
 			
 			while(res.next()) {
-				System.out.println("Get close");
+				//System.out.println("Get close");
 
 				data[3] = res.getDouble("CLOSE");
 			}	
@@ -297,7 +333,7 @@ public class DBHandler {
 			res = stm.executeQuery(sql);
 			
 			while(res.next()) {
-				System.out.println("Get low");
+				//System.out.println("Get low");
 
 				data[4] = res.getDouble("LOW");
 			}	
@@ -307,7 +343,7 @@ public class DBHandler {
 			res = stm.executeQuery(sql);
 			
 			while(res.next()) {
-				System.out.println("Get high");
+				//System.out.println("Get high");
 
 				data[5] = res.getDouble("HIGH");
 			}	
@@ -320,7 +356,7 @@ public class DBHandler {
 			while(res.next()) {
 				data[6] = res.getDouble("VOLUME");
 
-				System.out.println("Get volume: " + data[6]);
+				//System.out.println("Get volume: " + data[6]);
 			}	
 
 			

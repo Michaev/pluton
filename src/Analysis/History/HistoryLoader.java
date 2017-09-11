@@ -52,6 +52,8 @@ public class HistoryLoader {
 		int falsePositivesTurning2 = 0;
 		int correctTurning2 = 0;
 		
+		double turningFactor = 1;
+		
 		String[] history = new String[8];
 		
 		int count = 0;
@@ -62,12 +64,22 @@ public class HistoryLoader {
 			stop = Long.parseLong(row.split(",")[1]);
 			gain = Double.parseDouble(row.split(",")[2]);
 			volume = Double.parseDouble(row.split(",")[3]);
+
+			double avgVolume = parent.dbHandler.getAverageVolume(cur1, cur2, start);
+			
+			if(avgVolume == -1) {
+				System.out.println("Not enough volume data. " + start);
+				continue;
+			}
 			
 			if(checkForTurning2) {
 				if(isDescending(row))
 					falsePositivesTurning2++;
 				else {
 					correctTurning2++;
+					turningFactor *= gain;
+					
+					System.out.println("Turn successful. Gain: " + turningFactor);
 				}
 				checkForTurning2 = false;
 			}
@@ -80,13 +92,21 @@ public class HistoryLoader {
 				else {
 					correctTurning++;
 					checkForTurning2 = true;
+					turningFactor = gain;
 				}
 				checkForTurning = false;
 			}
 			
-			if(gain > Configuration.JUMP_LIMIT && volume > Configuration.JUMP_LIMIT_VOL) {
+			double volumeRatio = volume / avgVolume;
+			
+			if(consecutive > 0) {
+				System.out.println("Tick after jump: " + gain + " at vol " + volumeRatio);
+				System.out.println();
+			}
+			
+			if(gain > Configuration.JUMP_LIMIT && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
 				consecutive++;
-				System.out.println("Found jump above limit: " + gain + " (" + volume + ") at " + start);
+				System.out.println("Found jump above limit: " + gain + " (" + volumeRatio + ") at " + start);
 //				System.out.println(history[0]);
 //				System.out.println(history[1]);
 //				System.out.println(history[2]);
@@ -99,12 +119,12 @@ public class HistoryLoader {
 				count++;
 				
 				if(consecutive > 1) {
-					System.out.println("Consecutive jump(" + consecutive + "): " + gain + " (" + volume + ") at " + start);
+					System.out.println("Consecutive jump(" + consecutive + "): " + gain + " (" + volumeRatio + ") at " + start);
 					countC++;
 				}
 				
 				if(previousDescending(history) > 1) {
-					System.out.println(previousDescending(history) + " desc. Turning point? : " + gain + " (" + volume + ") at " + start);
+					System.out.println(previousDescending(history) + " desc. Turning point? : " + gain + " (" + volumeRatio + ") at " + start);
 					checkForTurning = true;
 				} 
 			}
@@ -238,8 +258,10 @@ public class HistoryLoader {
 				high = (double) data[5] / close;
 				
 				// Implement dynamically. Set to five minutes for now.
-				volume = (double) data[6] / 
-						(Double.parseDouble(parent.dataHandler.getVolume24h().get(cur1 + "/" + cur2)) / 24.0 / 12.0); 
+//				volume = (double) data[6] / 
+//						(Double.parseDouble(parent.dataHandler.getVolume24h().get(cur1 + "/" + cur2)) / 24.0 / 12.0); 
+				
+				volume = (double) data[6];
 			}
 
 			parent.dbHandler.insertDataPoint(cur1, cur2, currentStamp, currentStop, gain, low, high, volume, intervals);
