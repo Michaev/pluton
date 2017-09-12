@@ -57,6 +57,11 @@ public class HistoryLoader {
 		
 		String[] history = new String[8];
 		
+
+		double avgVolume = parent.dbHandler.get24HVolume(cur1, cur2); // Simplified avg volume
+		avgVolume /= (24 * 60 * 60 * 1000);
+		avgVolume *= Configuration.INTERVAL_TICK_GEN;
+		
 		int count = 0;
 		int countD = 0;
 		int countC = 0;
@@ -67,7 +72,7 @@ public class HistoryLoader {
 			gain = Double.parseDouble(row.split(",")[2]);
 			volume = Double.parseDouble(row.split(",")[3]);
 
-			double avgVolume = parent.dbHandler.getAverageVolume(cur1, cur2, start);
+			//double avgVolume = parent.dbHandler.getAverageVolume(cur1, cur2, start);
 			
 			if(avgVolume == -1) {
 				//System.out.println("Not enough volume data. " + start);
@@ -124,7 +129,7 @@ public class HistoryLoader {
 //				System.out.println(history[7]);
 //				System.out.println();
 				
-				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start - Configuration.INTERVAL_TICK_GEN*2, start + Configuration.INTERVAL_TICK_GEN*2);
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*2);
 				
 				for(String zoomRow: zoomRows) {
 					long zstart = Long.parseLong(zoomRow.split(",")[0]);
@@ -133,7 +138,9 @@ public class HistoryLoader {
 					
 					double zVolumeRatio = zvolume / (avgVolume / 5);
 					
+					if(zstart == start || zstart == stop) System.out.println("-------");
 					System.out.println("Micro trade at " + zstart + " " + parent.timestampToDate(zstart) + " (" + zVolumeRatio + "): " + zgain);
+					if(zstart == start || zstart == stop) System.out.println("-------");
 					
 				}
 				System.out.println("End microtrade ----------------------");
@@ -165,7 +172,7 @@ public class HistoryLoader {
 			if(gain <= 2-(Configuration.JUMP_LIMIT) && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
 				consecutiveDuck++;
 				System.out.println("Found duck above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
-				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start - Configuration.INTERVAL_TICK_GEN*2, start + Configuration.INTERVAL_TICK_GEN*2);
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*2);
 				
 				for(String zoomRow: zoomRows) {
 					long zstart = Long.parseLong(zoomRow.split(",")[0]);
@@ -174,7 +181,9 @@ public class HistoryLoader {
 					
 					double zVolumeRatio = zvolume / (avgVolume / 5);
 					
+					if(zstart == start || zstart == stop) System.out.println("-------");
 					System.out.println("Micro trade at " + zstart + " " + parent.timestampToDate(zstart) + " (" + zVolumeRatio + "): " + zgain);
+					if(zstart == start || zstart == stop) System.out.println("-------");
 					
 				}
 				System.out.println("End microtrade ----------------------");
@@ -255,7 +264,7 @@ public class HistoryLoader {
 	
 	private long loadHistoryArray(long timestamp, String cur1, String cur2) {
 		
-		System.out.println("loadHistoryArray starting at " + timestamp);
+		System.out.println("loadHistoryArray starting at " +parent.timestampToDate(timestamp));
 		
 		JSONArray jsonArray = parent.restHandler_btf.getTrades(timestamp, cur1, cur2);
 		

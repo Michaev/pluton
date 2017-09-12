@@ -10,9 +10,9 @@ public class Configuration {
 	public static String MODE = "training";				// Stage 3 - Train AI
 	//public static String MODE = "pluton";				// Stage 4 - let's roll
 
-	public static long INTERVAL_TICK_GEN = 1000 * 60 * 1; // One minute intervals
+	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1; // One minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
-	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
+	public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1440; // Day minute intervals
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
@@ -21,7 +21,7 @@ public class Configuration {
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	
 	public static double JUMP_LIMIT = 1.008;
-	public static double JUMP_LIMIT_VOL = 5;
+	public static double JUMP_LIMIT_VOL = 3;
 	
 	// Training
 	public static int NN_LATENCY = 5;
@@ -45,7 +45,7 @@ public class Configuration {
 	public static double WALL_TARGET_GAP_LIMIT = 0.8; // How small difference between wall and interval target before acting
 	public static double WALLS_GAP_LIMIT = 0.5; // How small gap between floor and ceiling before acting
 	
-	public static double STOP_LOSS_LIMIT = 0.5; // How big percentage loss before dropping
+	public static double STOP_LOSS_LIMIT = 1; // How big percentage loss before dropping
 	public static double ROI_GOAL = 0.8; // How many percentage return on investment to expect per trade
 	
 	public static double BID_ASK_SIG_LIMIT = 0.15; // How much variation in price before altering bid/ask
