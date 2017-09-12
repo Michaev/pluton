@@ -102,12 +102,12 @@ public class HistoryLoader {
 			double volumeRatio = volume / avgVolume;
 			
 			if(consecutive > 0) {
-				System.out.println("Tick after jump: " + gain + " at vol " + volumeRatio);
+				System.out.println("Tick after jump: " + gain + " at vol " + volumeRatio + "(" + parent.timestampToDate(start) + ")");
 				System.out.println();
 			}
 			
 			if(consecutiveDuck > 0) {
-				System.out.println("Tick after duck: " + gain + " at vol " + volumeRatio);
+				System.out.println("Tick after duck: " + gain + " at vol " + volumeRatio + "(" + parent.timestampToDate(start) + ")");
 				System.out.println();
 			}
 			
@@ -123,6 +123,23 @@ public class HistoryLoader {
 //				System.out.println(history[6]);
 //				System.out.println(history[7]);
 //				System.out.println();
+				
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start - Configuration.INTERVAL_TICK_GEN*2, start + Configuration.INTERVAL_TICK_GEN*2);
+				
+				for(String zoomRow: zoomRows) {
+					long zstart = Long.parseLong(zoomRow.split(",")[0]);
+					double zgain = Double.parseDouble(zoomRow.split(",")[2]);
+					double zvolume = Double.parseDouble(zoomRow.split(",")[3]);
+					
+					double zVolumeRatio = zvolume / (avgVolume / 5);
+					
+					System.out.println("Micro trade at " + zstart + " " + parent.timestampToDate(zstart) + " (" + zVolumeRatio + "): " + zgain);
+					
+				}
+				System.out.println("End microtrade ----------------------");
+				System.out.println();
+				
+				
 				count++;
 				
 				if(consecutive > 1) {
@@ -148,6 +165,20 @@ public class HistoryLoader {
 			if(gain <= 2-(Configuration.JUMP_LIMIT) && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
 				consecutiveDuck++;
 				System.out.println("Found duck above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start - Configuration.INTERVAL_TICK_GEN*2, start + Configuration.INTERVAL_TICK_GEN*2);
+				
+				for(String zoomRow: zoomRows) {
+					long zstart = Long.parseLong(zoomRow.split(",")[0]);
+					double zgain = Double.parseDouble(zoomRow.split(",")[2]);
+					double zvolume = Double.parseDouble(zoomRow.split(",")[3]);
+					
+					double zVolumeRatio = zvolume / (avgVolume / 5);
+					
+					System.out.println("Micro trade at " + zstart + " " + parent.timestampToDate(zstart) + " (" + zVolumeRatio + "): " + zgain);
+					
+				}
+				System.out.println("End microtrade ----------------------");
+				System.out.println();
 				countD++;
 			} else
 				consecutiveDuck = 0;
@@ -160,11 +191,11 @@ public class HistoryLoader {
 
 		System.out.println("Total ducks: " + countD);
 		
-		System.out.println("Total false positives: " + falsePositivesTurning);
-		System.out.println("Total correct turn predictions: " + correctTurning);
-
-		System.out.println("Total false positives2: " + falsePositivesTurning2);
-		System.out.println("Total correct turn predictions2: " + correctTurning2);
+//		System.out.println("Total false positives: " + falsePositivesTurning);
+//		System.out.println("Total correct turn predictions: " + correctTurning);
+//
+//		System.out.println("Total false positives2: " + falsePositivesTurning2);
+//		System.out.println("Total correct turn predictions2: " + correctTurning2);
 	}
 	
 	private int previousDescending(String[] history) {
