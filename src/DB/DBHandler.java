@@ -231,6 +231,27 @@ public class DBHandler {
 		return rows;
 	}
 	
+	public List<String> getDataPoints(String cur1, String cur2, long intervals, long start, long stop) {
+		
+		ResultSet res;
+		List<String> rows = new ArrayList<String>();
+		
+		try {
+			String sql = "select round(start, 4), round(stop, 4), round(gain, 4), round(volume, 4) from datapoints_" + cur1 + "_" + cur2 + "_" + intervals 
+					+ " where start > " + start + " and start <= " + stop;
+			
+			res = stm.executeQuery(sql);
+			while(res.next()) {
+				rows.add(res.getLong(1) + "," + res.getLong(2) + "," + res.getDouble(3) + "," + res.getDouble(4));
+			}		
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return rows;
+	}
+	
 	public long[] getStartStop(String currency) {
 		String cur1 = currency.split("/")[1];
 		String cur2 = currency.split("/")[2];
@@ -294,6 +315,28 @@ public class DBHandler {
 			e.printStackTrace();
 		}
 
+	}
+	
+	public List<String> getRawTrades(String cur1, String cur2, long timestamp, long interval) {
+		long stop = timestamp + interval;
+		
+		List<String> data = new ArrayList<String>();
+		
+		ResultSet res;
+		
+		try {
+			String sql = "select timestamp, amount, price from history_" + cur1 + "_" + cur2 + " where timestamp >= " + timestamp
+					+ " and timestamp < " + stop;
+			res = stm.executeQuery(sql);
+			
+			while(res.next()) {
+				data.add(res.getLong("TIMESTAMP") + "," + res.getDouble("AMOUNT") + "," + res.getDouble("PRICE"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return data;
 	}
 	
 	public Object[] getDataPoint(String cur1, String cur2, long currentStamp, long intervals) {

@@ -9,9 +9,10 @@ public class Configuration {
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
 	public static String MODE = "training";				// Stage 3 - Train AI
 	//public static String MODE = "pluton";				// Stage 4 - let's roll
-	
+
+	public static long INTERVAL_TICK_GEN = 1000 * 60 * 1; // One minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
-	public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
+	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1440; // Day minute intervals
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
