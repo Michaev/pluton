@@ -33,6 +33,92 @@ public class HistoryLoader {
 		return tempArray;
 	}
 	
+	public void findJumpsV2(String currency) {
+		String cur1 = currency.split("/")[1];
+		String cur2 = currency.split("/")[2];
+		
+		List<String> rows = parent.dbHandler.getDataPoints(cur1, cur2, Configuration.INTERVAL_TICK_GEN);
+		
+		long start;
+		long stop;
+		double gain;
+		double volume;
+		
+		int state = 0; 
+		
+		/*
+		 * 0: Looking for opportunities 
+		 * 1: Trying to buy
+		 * 2: Bought, waiting to sell
+		 * 3: Trying to sell
+		 */
+
+		String[] history = new String[8];
+		
+
+		double avgVolume = parent.dbHandler.get24HVolume(cur1, cur2); // Simplified avg volume
+		avgVolume /= (24 * 60 * 60 * 1000);
+		avgVolume *= Configuration.INTERVAL_TICK_GEN;
+		
+		int count = 0;
+		int countD = 0;
+		int countC = 0;
+		
+		for(String row : rows) {
+			start = Long.parseLong(row.split(",")[0]);
+			stop = Long.parseLong(row.split(",")[1]);
+			gain = Double.parseDouble(row.split(",")[2]);
+			volume = Double.parseDouble(row.split(",")[3]);
+
+			if(avgVolume == -1) {
+				//System.out.println("Not enough volume data. " + start);
+				continue;
+			}
+			
+			double volumeRatio = volume / avgVolume;
+			
+			if(gain > Configuration.JUMP_LIMIT && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
+				System.out.println("Found jump above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
+
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*10);
+				
+				for(String zoomRow: zoomRows) {
+					long zstart = Long.parseLong(zoomRow.split(",")[0]);
+					double zgain = Double.parseDouble(zoomRow.split(",")[2]);
+					double zvolume = Double.parseDouble(zoomRow.split(",")[3]);
+					
+					double zVolumeRatio = zvolume / (avgVolume / 5);
+					
+					System.out.println("Micro trade at " + zstart + " " + parent.timestampToDate(zstart) + " (" + zVolumeRatio + "): " + zgain);
+					
+				}
+				System.out.println("End microtrade ----------------------");
+				System.out.println();
+			}
+			
+			if(gain <= 2-(Configuration.JUMP_LIMIT) && volumeRatio > Configuration.JUMP_LIMIT_VOL && false) {
+				System.out.println("Found duck above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*10);
+				
+				for(String zoomRow: zoomRows) {
+					long zstart = Long.parseLong(zoomRow.split(",")[0]);
+					double zgain = Double.parseDouble(zoomRow.split(",")[2]);
+					double zvolume = Double.parseDouble(zoomRow.split(",")[3]);
+					
+					double zVolumeRatio = zvolume / (avgVolume / 5);
+					
+					System.out.println("Micro trade at " + zstart + " " + parent.timestampToDate(zstart) + " (" + zVolumeRatio + "): " + zgain);
+					
+				}
+				System.out.println("End microtrade ----------------------");
+				System.out.println();
+				countD++;
+			} 
+			
+			history = shiftArray(history, row, 8);
+		}
+	}
+	
 	public void findJumps(String currency) {
 		String cur1 = currency.split("/")[1];
 		String cur2 = currency.split("/")[2];
@@ -129,7 +215,7 @@ public class HistoryLoader {
 //				System.out.println(history[7]);
 //				System.out.println();
 				
-				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*2);
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*3);
 				
 				for(String zoomRow: zoomRows) {
 					long zstart = Long.parseLong(zoomRow.split(",")[0]);
@@ -172,7 +258,7 @@ public class HistoryLoader {
 			if(gain <= 2-(Configuration.JUMP_LIMIT) && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
 				consecutiveDuck++;
 				System.out.println("Found duck above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
-				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*2);
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*3);
 				
 				for(String zoomRow: zoomRows) {
 					long zstart = Long.parseLong(zoomRow.split(",")[0]);
@@ -264,7 +350,7 @@ public class HistoryLoader {
 	
 	private long loadHistoryArray(long timestamp, String cur1, String cur2) {
 		
-		System.out.println("loadHistoryArray starting at " +parent.timestampToDate(timestamp));
+		System.out.println("loadHistoryArray starting at " + parent.timestampToDate(timestamp));
 		
 		JSONArray jsonArray = parent.restHandler_btf.getTrades(timestamp, cur1, cur2);
 		

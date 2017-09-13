@@ -16,6 +16,7 @@ import Config.Configuration;
 import DB.DBHandler;
 import Data.DataHandler;
 import Data.FileLoader;
+import Data.Funds;
 import MarketBuildTraining.MarketBuildTraining;
 import MarketBuildTraining.MarketEvaluate;
 import MarketBuildTraining.MarketPredict;
@@ -49,6 +50,8 @@ public class Pluton {
 		dataHandler = new DataHandler(verbose, this);
 		restHandler_btf = new Rest_BTF();
 		dataHandler.load24HVolume(currencies);
+		
+		Funds funds = new Funds("USD", 1000, 0);
 		
 		if(Configuration.MODE.equals("loadHistory")) {
 			HistoryLoader historyLoader = new HistoryLoader(this);
@@ -109,7 +112,8 @@ public class Pluton {
 //				Encog.getInstance().shutdown();
 				HistoryLoader historyLoader = new HistoryLoader(this);
 				
-				historyLoader.findJumps(currency);
+				//historyLoader.findJumps(currency);
+				historyLoader.findJumpsV2(currency);
 				
 				
 			}
