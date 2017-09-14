@@ -45,6 +45,7 @@ public class HistoryLoader {
 		double volume;
 		
 		int state = 0; 
+		double buyPrice = -1;
 		
 		/*
 		 * 0: Looking for opportunities 
@@ -80,7 +81,15 @@ public class HistoryLoader {
 			if(gain > Configuration.JUMP_LIMIT && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
 				System.out.println("Found jump above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
 
-				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*10);
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-(5*Configuration.INTERVAL_TICK_GEN), start + Configuration.INTERVAL_TICK_GEN*15);
+				
+				if(state != 2) {
+					state = 2; // Simulation, jumping to state 2
+				
+					buyPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start);
+					parent.logger.logTrade("Bying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start) + " for " + buyPrice);
+				}
+				
 				
 				for(String zoomRow: zoomRows) {
 					long zstart = Long.parseLong(zoomRow.split(",")[0]);
@@ -96,26 +105,19 @@ public class HistoryLoader {
 				System.out.println();
 			}
 			
-			if(gain <= 2-(Configuration.JUMP_LIMIT) && volumeRatio > Configuration.JUMP_LIMIT_VOL && false) {
-				System.out.println("Found duck above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
-				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-1, start + Configuration.INTERVAL_TICK_GEN*10);
+			if(gain <= Configuration.STOP_LOSS_LIMIT) {
 				
-				for(String zoomRow: zoomRows) {
-					long zstart = Long.parseLong(zoomRow.split(",")[0]);
-					double zgain = Double.parseDouble(zoomRow.split(",")[2]);
-					double zvolume = Double.parseDouble(zoomRow.split(",")[3]);
+				if(state == 2) {
+					double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start);
+					parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start) + " for " + price);
+					parent.logger.logTrade("Total gain: " + price / buyPrice);
 					
-					double zVolumeRatio = zvolume / (avgVolume / 5);
+					parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + (1000 * (price / buyPrice) - 1000));
+					parent.logger.logTrade("New funds: " + parent.funds.getAmountAvailable());
 					
-					System.out.println("Micro trade at " + zstart + " " + parent.timestampToDate(zstart) + " (" + zVolumeRatio + "): " + zgain);
-					
+					state = 0;
 				}
-				System.out.println("End microtrade ----------------------");
-				System.out.println();
-				countD++;
-			} 
-			
-			history = shiftArray(history, row, 8);
+			}
 		}
 	}
 	

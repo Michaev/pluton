@@ -39,6 +39,7 @@ public class Pluton {
 	public DBHandler dbHandler;
 	public Analyzer analyzer;
 	public Logger logger;
+	public Funds funds;
 	
 	public List<String> currencies = new ArrayList<String>();
 	
@@ -51,7 +52,7 @@ public class Pluton {
 		restHandler_btf = new Rest_BTF();
 		dataHandler.load24HVolume(currencies);
 		
-		Funds funds = new Funds("USD", 1000, 0);
+		funds = new Funds("USD", 1000, 0);
 		
 		if(Configuration.MODE.equals("loadHistory")) {
 			HistoryLoader historyLoader = new HistoryLoader(this);
