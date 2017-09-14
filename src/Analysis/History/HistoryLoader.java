@@ -46,6 +46,7 @@ public class HistoryLoader {
 		
 		int state = 0; 
 		double buyPrice = -1;
+		double peakPrice = -1;
 		
 		/*
 		 * 0: Looking for opportunities 
@@ -87,6 +88,7 @@ public class HistoryLoader {
 					state = 2; // Simulation, jumping to state 2
 				
 					buyPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN);
+					peakPrice = buyPrice;
 					parent.logger.logTrade("Bying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + buyPrice);
 				}
 				
@@ -105,7 +107,29 @@ public class HistoryLoader {
 				System.out.println();
 			}
 			
-			if(gain <= Configuration.STOP_LOSS_LIMIT) {
+			if(state == 2) {
+				double currentPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start);
+				if(currentPrice > peakPrice)
+					peakPrice = currentPrice;
+				
+				double lossFromPeak = currentPrice / peakPrice;
+				if(lossFromPeak <= Configuration.STOP_LOSS_LIMIT) {
+					state = 3;
+					parent.logger.logTrade(cur1 + "/" + cur2 + ": Price dropped " + lossFromPeak + " at " + parent.timestampToDate(start) + ". Selling out.");
+				}
+			}
+			
+			if(state == 3) {
+				double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN);
+				parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
+				parent.logger.logTrade("Total gain: " + price / buyPrice);
+				
+				parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + (1000 * (price / buyPrice) - 1000));
+				parent.logger.logTrade("New funds: " + parent.funds.getAmountAvailable());
+				state = 0;
+			}
+			
+			if(gain <= Configuration.STOP_LOSS_LIMIT && false) {
 				
 				if(state == 2) {
 					double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN);

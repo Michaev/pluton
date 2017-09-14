@@ -10,7 +10,8 @@ public class Configuration {
 	public static String MODE = "training";				// Stage 3 - Train AI
 	//public static String MODE = "pluton";				// Stage 4 - let's roll
 
-	public static long INTERVAL_TICK_GEN = 1000 * 60 * 1; // One minute intervals
+	public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.5); // Thirty second intervals
+	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1; // One minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1440; // Day minute intervals
@@ -20,7 +21,7 @@ public class Configuration {
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	
-	public static double JUMP_LIMIT = 1.01;
+	public static double JUMP_LIMIT = 1.005;
 	public static double JUMP_LIMIT_VOL = 5;
 	
 	// Training
