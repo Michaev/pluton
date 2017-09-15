@@ -141,13 +141,23 @@ public class DBHandler {
 		}
 	}
 	
-	public double getCurrentPrice(String cur1, String cur2, long timestamp) {
+	public double getCurrentPrice(String cur1, String cur2, long timestamp, int type) {
 
 		ResultSet res;
 		double price = -1;
 		
 		try {
-			String sql = "select price from history_" + cur1 + "_" + cur2 + " where timestamp > " + timestamp + " limit 1";
+			String sql = "";
+
+			// Getting bid, offer or just last price?
+			if(type == 0)
+				sql = "select price from history_" + cur1 + "_" + cur2 + " where timestamp > " + timestamp + " and amount > 0 limit 1";
+
+			if(type == 1)
+				sql = "select price from history_" + cur1 + "_" + cur2 + " where timestamp > " + timestamp + " and amount < 0 limit 1";
+			
+			if(type == -1)
+				sql = "select price from history_" + cur1 + "_" + cur2 + " where timestamp > " + timestamp + " limit 1";
 			
 			res = stm.executeQuery(sql);
 			while(res.next()) {

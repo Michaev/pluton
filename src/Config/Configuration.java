@@ -21,8 +21,8 @@ public class Configuration {
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	
-	public static double JUMP_LIMIT = 1.005;
-	public static double JUMP_LIMIT_VOL = 5;
+	public static double JUMP_LIMIT = 1.008;
+	public static double JUMP_LIMIT_VOL = 8;
 	
 	// Training
 	public static int NN_LATENCY = 5;
@@ -47,7 +47,7 @@ public class Configuration {
 	public static double WALLS_GAP_LIMIT = 0.5; // How small gap between floor and ceiling before acting
 	
 	public static double STOP_LOSS_LIMIT = 0.99; // How big percentage loss before dropping
-	public static double ROI_GOAL = 0.8; // How many percentage return on investment to expect per trade
+	public static double ROI_GOAL = 1.04; // How many percentage return on investment to expect per trade
 	
 	public static double BID_ASK_SIG_LIMIT = 0.15; // How much variation in price before altering bid/ask
 

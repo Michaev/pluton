@@ -1,6 +1,8 @@
 package Analysis.History;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -47,6 +49,8 @@ public class HistoryLoader {
 		int state = 0; 
 		double buyPrice = -1;
 		double peakPrice = -1;
+		long buyTimestamp = -1;
+		int countGrowing = 0;
 		
 		/*
 		 * 0: Looking for opportunities 
@@ -56,6 +60,8 @@ public class HistoryLoader {
 		 */
 
 		String[] history = new String[8];
+		
+		List<String> gains = new ArrayList<String>();
 		
 
 		double avgVolume = parent.dbHandler.get24HVolume(cur1, cur2); // Simplified avg volume
@@ -79,17 +85,34 @@ public class HistoryLoader {
 			
 			double volumeRatio = volume / avgVolume;
 			
+			if(gain > 1.002 && volumeRatio > Configuration.JUMP_LIMIT_VOL)
+				countGrowing++;
+			else
+				countGrowing = 0;
+			
+//			if(countGrowing > 3) {
+//				if(state != 2) {
+//					state = 2; // Simulation, jumping to state 2
+//				
+//					buyPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 1);
+//					peakPrice = buyPrice;
+//					buyTimestamp = start + Configuration.INTERVAL_TICK_GEN;
+//					parent.logger.logTrade("Buying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + buyPrice + " (consecutive growth)");
+//				}
+//			}
+			
 			if(gain > Configuration.JUMP_LIMIT && volumeRatio > Configuration.JUMP_LIMIT_VOL) {
 				System.out.println("Found jump above limit: " + gain + " (" + volumeRatio + ") at " + parent.timestampToDate(start));
 
-				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, 60000, start-(5*Configuration.INTERVAL_TICK_GEN), start + Configuration.INTERVAL_TICK_GEN*15);
+				List<String> zoomRows = parent.dbHandler.getDataPoints(cur1, cur2, Configuration.INTERVAL_TICK_GEN, start-(5*Configuration.INTERVAL_TICK_GEN), start + Configuration.INTERVAL_TICK_GEN*15);
 				
 				if(state != 2) {
 					state = 2; // Simulation, jumping to state 2
 				
-					buyPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN);
+					buyPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 0);
 					peakPrice = buyPrice;
-					parent.logger.logTrade("Bying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + buyPrice);
+					buyTimestamp = start + Configuration.INTERVAL_TICK_GEN;
+					parent.logger.logTrade("Buying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + buyPrice + " (gain and volume higher than treshold)");
 				}
 				
 				
@@ -108,21 +131,30 @@ public class HistoryLoader {
 			}
 			
 			if(state == 2) {
-				double currentPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start);
+				double currentPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start, -1);
 				if(currentPrice > peakPrice)
 					peakPrice = currentPrice;
 				
 				double lossFromPeak = currentPrice / peakPrice;
-				if(lossFromPeak <= Configuration.STOP_LOSS_LIMIT) {
+				double gainFromStart = currentPrice / buyPrice;
+				
+				if(lossFromPeak <= Configuration.STOP_LOSS_LIMIT && start > buyTimestamp) {
 					state = 3;
-					parent.logger.logTrade(cur1 + "/" + cur2 + ": Price dropped " + lossFromPeak + " at " + parent.timestampToDate(start) + ". Selling out.");
+					parent.logger.logTrade(cur1 + "/" + cur2 + ": Price dropped " + lossFromPeak + " at " + parent.timestampToDate(start) + ". Selling out. (price dropped below treshold)");
+				}
+				
+				if(gainFromStart >= Configuration.ROI_GOAL && start > buyTimestamp) {
+					state = 3;
+					parent.logger.logTrade(cur1 + "/" + cur2 + ": Price increased " + lossFromPeak + " at " + parent.timestampToDate(start) + ". Selling out. (price hit ROI goal)");
 				}
 			}
 			
 			if(state == 3) {
-				double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN);
+				double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 1);
 				parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
 				parent.logger.logTrade("Total gain: " + price / buyPrice);
+				
+				gains.add("" + price / buyPrice);
 				
 				parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + (1000 * (price / buyPrice) - 1000));
 				parent.logger.logTrade("New funds: " + parent.funds.getAmountAvailable());
@@ -132,7 +164,7 @@ public class HistoryLoader {
 			if(gain <= Configuration.STOP_LOSS_LIMIT && false) {
 				
 				if(state == 2) {
-					double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN);
+					double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 1);
 					parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
 					parent.logger.logTrade("Total gain: " + price / buyPrice);
 					
@@ -143,6 +175,12 @@ public class HistoryLoader {
 				}
 			}
 		}
+		
+		System.out.println();
+		System.out.println("List of gains:");
+		gains.sort(Comparator.comparing(Double::parseDouble));
+		for(String g: gains) 
+			parent.logger.logTrade(g);
 	}
 	
 	public void findJumps(String currency) {
