@@ -10,6 +10,7 @@ public class Configuration {
 	public static String MODE = "training";				// Stage 3 - Train AI
 	//public static String MODE = "pluton";				// Stage 4 - let's roll
 
+	//public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.25); // Fifteen second intervals
 	public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.5); // Thirty second intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1; // One minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
@@ -21,7 +22,7 @@ public class Configuration {
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	
-	public static double JUMP_LIMIT = 1.008;
+	public static double JUMP_LIMIT = 1.015;
 	public static double JUMP_LIMIT_VOL = 8;
 	
 	// Training
@@ -46,7 +47,7 @@ public class Configuration {
 	public static double WALL_TARGET_GAP_LIMIT = 0.8; // How small difference between wall and interval target before acting
 	public static double WALLS_GAP_LIMIT = 0.5; // How small gap between floor and ceiling before acting
 	
-	public static double STOP_LOSS_LIMIT = 0.99; // How big percentage loss before dropping
+	public static double STOP_LOSS_LIMIT = 0.994; // How big percentage loss before dropping
 	public static double ROI_GOAL = 1.04; // How many percentage return on investment to expect per trade
 	
 	public static double BID_ASK_SIG_LIMIT = 0.15; // How much variation in price before altering bid/ask
@@ -77,6 +78,8 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
+
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/LTC/USD", "BTF/OMG/USD");
 	
 	// 4. Finished training.
 	// None

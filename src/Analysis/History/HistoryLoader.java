@@ -109,10 +109,10 @@ public class HistoryLoader {
 				if(state != 2) {
 					state = 2; // Simulation, jumping to state 2
 				
-					buyPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 0);
+					buyPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 1);
 					peakPrice = buyPrice;
 					buyTimestamp = start + Configuration.INTERVAL_TICK_GEN;
-					parent.logger.logTrade("Buying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + buyPrice + " (gain and volume higher than treshold)");
+					parent.logger.logTrade("Buying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + buyPrice + " (gain and volume higher than treshold, " + gain + ", " + volumeRatio);
 				}
 				
 				
@@ -152,11 +152,12 @@ public class HistoryLoader {
 			if(state == 3) {
 				double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 1);
 				parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
-				parent.logger.logTrade("Total gain: " + price / buyPrice);
+				double tradeGain = (price / buyPrice) - 0.003;
+				parent.logger.logTrade("Total gain: " + tradeGain);
 				
-				gains.add("" + price / buyPrice);
+				gains.add("" + tradeGain);
 				
-				parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + (1000 * (price / buyPrice) - 1000));
+				parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + ((1000 * tradeGain) - 1000));
 				parent.logger.logTrade("New funds: " + parent.funds.getAmountAvailable());
 				state = 0;
 			}
