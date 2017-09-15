@@ -52,6 +52,8 @@ public class HistoryLoader {
 		long buyTimestamp = -1;
 		int countGrowing = 0;
 		
+		int trades = 0;
+		
 		/*
 		 * 0: Looking for opportunities 
 		 * 1: Trying to buy
@@ -113,6 +115,7 @@ public class HistoryLoader {
 					peakPrice = buyPrice;
 					buyTimestamp = start + Configuration.INTERVAL_TICK_GEN;
 					parent.logger.logTrade("Buying " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + buyPrice + " (gain and volume higher than treshold, " + gain + ", " + volumeRatio);
+					trades++;
 				}
 				
 				
@@ -152,6 +155,7 @@ public class HistoryLoader {
 			if(state == 3) {
 				double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 1);
 				parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
+				trades++;
 				double tradeGain = (price / buyPrice) - 0.003;
 				parent.logger.logTrade("Total gain: " + tradeGain);
 				
@@ -176,6 +180,8 @@ public class HistoryLoader {
 				}
 			}
 		}
+
+		parent.logger.logTrade("Total trades: " + trades);
 		
 		System.out.println();
 		System.out.println("List of gains:");

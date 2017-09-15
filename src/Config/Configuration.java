@@ -22,7 +22,7 @@ public class Configuration {
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	
-	public static double JUMP_LIMIT = 1.015;
+	public static double JUMP_LIMIT = 1.007;
 	public static double JUMP_LIMIT_VOL = 8;
 	
 	// Training
