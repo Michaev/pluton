@@ -1,5 +1,6 @@
 package Analysis;
 import java.util.Date;
+import java.util.List;
 
 import Config.Configuration;
 import Data.DataHandler;
@@ -39,9 +40,9 @@ public class Analyzer {
 	}
 	
 	private double[] getCeilingInterval(Order order, int depth, double size) {
-		Offer[] sellEntries = order.getSellEntries();
+		List<Offer> sellEntries = order.getSellEntries();
 		
-		if(sellEntries.length < 1) {
+		if(sellEntries.size() < 1) {
 			return null;
 		}
 		
@@ -49,7 +50,7 @@ public class Analyzer {
 		double highestPrice = Double.MAX_VALUE; // Misleading variable name; referring to price of biggest sell order. 
 		double highestTotal = 0;
 		double firstNotIgnored = 0;
-		double startPrice = sellEntries[0].getPrice();
+		double startPrice = sellEntries.get(0).getPrice();
 		
 		for(Offer sellEntry: sellEntries) {
 			if(sellEntry.getTotal() > highestTotal) { highestTotal = sellEntry.getTotal(); highestPrice = sellEntry.getPrice(); }
@@ -68,9 +69,9 @@ public class Analyzer {
 	}
 	
 	private double[] getFloorInterval(Order order, int depth, double size) {
-		Offer[] buyEntries = order.getBuyEntries();
+		List<Offer> buyEntries = order.getBuyEntries();
 		
-		if(buyEntries.length < 1) {
+		if(buyEntries.size() < 1) {
 			return null;
 		}
 		
@@ -78,7 +79,7 @@ public class Analyzer {
 		double highestPrice = 0;
 		double highestTotal = 0;
 		double firstNotIgnored = 0;
-		double startPrice = buyEntries[0].getPrice();
+		double startPrice = buyEntries.get(0).getPrice();
 		
 		for(Offer buyEntry: buyEntries) {
 			if(buyEntry.getTotal() > highestTotal) { highestTotal = buyEntry.getTotal(); highestPrice = buyEntry.getPrice(); }
@@ -96,7 +97,7 @@ public class Analyzer {
 	}
 	
 	private double[] getCeiling(Order order, int depth, double size) {
-		Offer[] sellEntries = order.getSellEntries();
+		List<Offer> sellEntries = order.getSellEntries();
 		
 		for(Offer sellEntry: sellEntries) {
 			if(sellEntry.getTotal() > size) {
@@ -109,7 +110,7 @@ public class Analyzer {
 	}
 	
 	private double[] getFloor(Order order, int depth, double size) {
-		Offer[] buyEntries = order.getBuyEntries();
+		List<Offer> buyEntries = order.getBuyEntries();
 		
 		for(Offer buyEntry: buyEntries) {
 			if(buyEntry.getTotal() > size) {

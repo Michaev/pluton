@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import Config.Configuration;
 import Engine.Pluton;
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 public class HistoryLoader {
 	
@@ -87,7 +88,7 @@ public class HistoryLoader {
 			
 			double volumeRatio = volume / avgVolume;
 			
-			if(gain > 1.002 && volumeRatio > Configuration.JUMP_LIMIT_VOL)
+			if(gain > Configuration.JUMP_LIMIT && volumeRatio > Configuration.JUMP_LIMIT_VOL)
 				countGrowing++;
 			else
 				countGrowing = 0;
@@ -154,7 +155,15 @@ public class HistoryLoader {
 			
 			if(state == 3) {
 				double price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + Configuration.INTERVAL_TICK_GEN, 1);
-				parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
+				double mPrice = parent.dbHandler.getLowestPrice(cur1, cur2, start, start + (Configuration.INTERVAL_TICK_GEN/2));
+				
+				if(mPrice / peakPrice <= Configuration.STOP_LOSS_LIMIT && mPrice > price) {
+					price = parent.dbHandler.getCurrentPrice(cur1, cur2, start + (Configuration.INTERVAL_TICK_GEN/2), 1);
+					parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + (Configuration.INTERVAL_TICK_GEN/2)) + " for " + price + " (intercepted)");
+				} else {
+					parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
+				}
+				
 				trades++;
 				double tradeGain = (price / buyPrice) - 0.003;
 				parent.logger.logTrade("Total gain: " + tradeGain);
@@ -181,7 +190,15 @@ public class HistoryLoader {
 			}
 		}
 
+		parent.logger.logTrade("Gain limit: " + Configuration.JUMP_LIMIT);
+		parent.logger.logTrade("Gain limit vol: " + Configuration.JUMP_LIMIT_VOL);
 		parent.logger.logTrade("Total trades: " + trades);
+
+		parent.logger.logCustom("Gain limit: " + Configuration.JUMP_LIMIT, "configs_" + cur1 + "_" + cur2 + ".txt");
+		parent.logger.logCustom("Gain limit vol: " + Configuration.JUMP_LIMIT_VOL, "configs_" + cur1 + "_" + cur2 + ".txt");
+		parent.logger.logCustom("New funds: " + parent.funds.getAmountAvailable(), "configs_" + cur1 + "_" + cur2 + ".txt");
+		parent.logger.logCustom("Total trades: " + trades, "configs_" + cur1 + "_" + cur2 + ".txt");
+		parent.logger.logCustom("", "configs_" + cur1 + "_" + cur2 + ".txt");
 		
 		System.out.println();
 		System.out.println("List of gains:");

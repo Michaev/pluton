@@ -7,8 +7,8 @@ public class Configuration {
 	
 	//public static String MODE = "loadHistory";			// Stage 1 - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
-	public static String MODE = "training";				// Stage 3 - Train AI
-	//public static String MODE = "pluton";				// Stage 4 - let's roll
+	//public static String MODE = "simulation";				// Stage 3 - Simulate strategy
+	public static String MODE = "pluton";				// Stage 4 - let's roll
 
 	//public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.25); // Fifteen second intervals
 	public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.5); // Thirty second intervals
@@ -21,9 +21,10 @@ public class Configuration {
 	public static int NUMBER_OF_DAYS_BACKLOAD = 30;
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
+	public static boolean VERBOSE = true;
 	
-	public static double JUMP_LIMIT = 1.007;
-	public static double JUMP_LIMIT_VOL = 8;
+	public static double JUMP_LIMIT = 0.995;		// Best for BCH, OMG, SAN, IOT, LTC and XMR
+	public static double JUMP_LIMIT_VOL = 0.001;
 	
 	// Training
 	public static int NN_LATENCY = 5;
@@ -47,13 +48,13 @@ public class Configuration {
 	public static double WALL_TARGET_GAP_LIMIT = 0.8; // How small difference between wall and interval target before acting
 	public static double WALLS_GAP_LIMIT = 0.5; // How small gap between floor and ceiling before acting
 	
-	public static double STOP_LOSS_LIMIT = 0.994; // How big percentage loss before dropping
-	public static double ROI_GOAL = 1.04; // How many percentage return on investment to expect per trade
+	public static double STOP_LOSS_LIMIT = 0.9999; // How big percentage loss before dropping
+	public static double ROI_GOAL = 1.0003; // How many percentage return on investment to expect per trade
 	
 	public static double BID_ASK_SIG_LIMIT = 0.15; // How much variation in price before altering bid/ask
 
 	public static int MISSION_INTERVAL = 4000;
-	public static int SCANNER_INTERVAL = 3500;
+	public static int SCANNER_INTERVAL = 30000;
 	public static int ANALYZE_CURRENT_PRICE_INTERVAL = 4000;
 	public static int ANALYZE_PRICE_HISTORY_DEPTH = 30;
 	public static int ANALYZE_FLOOR_CEILING_INTERVAL = 4000;
@@ -72,9 +73,14 @@ public class Configuration {
 	// None
 	
 	// 3. Training.
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/XMR/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/IOT/USD", "BTF/LTC/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");

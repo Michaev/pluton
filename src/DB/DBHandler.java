@@ -141,6 +141,29 @@ public class DBHandler {
 		}
 	}
 	
+	public double getLowestPrice(String cur1, String cur2, long start, long stop) {
+
+		ResultSet res;
+		double price = -1;
+		
+		try {
+			String sql = "";
+			sql = "select price from history_" + cur1 + "_" + cur2 + " where timestamp > " + start + " and timestamp <= " + stop + " limit 1";
+			
+			res = stm.executeQuery(sql);
+			while(res.next()) {
+				price = res.getDouble(1);
+				return price;
+			}		
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return price;
+
+	}
+	
 	public double getCurrentPrice(String cur1, String cur2, long timestamp, int type) {
 
 		ResultSet res;

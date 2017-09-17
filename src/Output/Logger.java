@@ -52,4 +52,19 @@ public class Logger {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	public void logCustom(String entry, String filepath) {
+		try {
+			BufferedWriter customLog;
+			FileWriter customFileWriter = new FileWriter(filepath, true);
+			customLog = new BufferedWriter(customFileWriter);
+			Date d = new Date();
+			
+			customLog.write(d.toString() + ": " + entry + "\n");
+			customLog.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

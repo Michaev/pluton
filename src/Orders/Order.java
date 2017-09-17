@@ -1,25 +1,32 @@
 package Orders;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import Data.DataHandler;
 
 public class Order {
+	
+	DataHandler parent;
 
 	public String cur1;
 	public String cur2;
 
 	private boolean verbose;
 	
-	private Offer[] sellEntries;
-	private Offer[] buyEntries;
+	private List<Offer> sellEntries;
+	private List<Offer> buyEntries;
 	
 	public Date updated;
 	
-	public Order(String cur1, String cur2, boolean verbose) {
+	public Order(String cur1, String cur2, DataHandler parent, boolean verbose) {
 		this.cur1 = cur1;
 		this.cur2 = cur2;
+		this.parent = parent;
 		this.verbose = verbose;
 		
-		sellEntries = new Offer[0];
-		buyEntries = new Offer[0];
+		sellEntries = new ArrayList<Offer>();
+		buyEntries = new ArrayList<Offer>();
 	}
 	
 	public void setOrder(String order) {
@@ -27,79 +34,37 @@ public class Order {
 		
 		updated = new Date();
 		
-		String asks = order.split("asks\":\\[")[1];
-		asks = asks.split("\\]\\],\"sell_total")[0];
-		asks = asks.substring(1, asks.length());
-		
-		String buys = order.split("bids\":\\[")[1];
-		buys = buys.split("\\]\\],\"buy_total")[0];
-		buys = buys.substring(1, buys.length());
-		
-		String[] sellEntriesString = asks.split("\\],\\[");
-		String[] buyEntriesString = buys.split("\\],\\[");
-		
 		clearAsks();
-
-		for(String sellEntry: sellEntriesString) {
-			addAsk(Double.parseDouble(sellEntry.split(",")[0]), Double.parseDouble(sellEntry.split(",")[1]));
-		}
-		
-//		System.out.println("20 biggest sell entries;");
-//		for(int  i = 0; i < sellEntries.length && i < 20; i++) {
-//			System.out.println(sellEntries[i].getPrice() + ", " + sellEntries[i].getAmount() + ", " + sellEntries[i].getTotal());
-//		}
-		
-		
 		clearBids();
-
-		for(String buyEntry: buyEntriesString) {
-			addBid(Double.parseDouble(buyEntry.split(",")[0]), Double.parseDouble(buyEntry.split(",")[1]));
-		}
 		
-//		System.out.println("20 biggest buy entries;");
-//		for(int  i = 0; i < buyEntries.length && i < 20; i++) {
-//			System.out.println(buyEntries[i].getPrice() + ", " + buyEntries[i].getAmount() + ", " + buyEntries[i].getTotal());
-//		}
+		for(String o: order.split("\\],\\[")) {
+			double price = Double.parseDouble(o.split(",")[0]);
+			double count = Double.parseDouble(o.split(",")[1]);
+			double amount = Double.parseDouble(o.split(",")[2]);
+			
+			if(amount > 0 && (parent.buyPrices.get(cur1 + cur2) == null || price != Double.parseDouble(parent.buyPrices.get(cur1 + cur2))) || count > 1) {
+				this.buyEntries.add(new Offer(price, amount));
+			}
+			if(amount < 0 && (parent.sellPrices.get(cur1 + cur2) == null  || price != Double.parseDouble(parent.sellPrices.get(cur1 + cur2))) || count > 1) {
+				this.sellEntries.add(new Offer(price, -amount));
+			}
+		}
 		
 	}
 	
 	private void clearAsks() {
-		this.sellEntries = new Offer[0];
+		this.sellEntries.clear();
 	}
 	
 	private void clearBids() {
-		this.buyEntries = new Offer[0];
+		this.buyEntries.clear();
 	}
 	
-	private void addAsk(double price, double amount) {
-		
-		Offer[] temp = new Offer[sellEntries.length+1];
-		
-		for(int i = 0; i < sellEntries.length; i++) {
-			temp[i] = sellEntries[i];
-		}
-		
-		temp[sellEntries.length] = new Offer(price, amount);
-		sellEntries = temp;
-	}
-	
-	private void addBid(double price, double amount) {
-		
-		Offer[] temp = new Offer[buyEntries.length+1];
-		
-		for(int i = 0; i < buyEntries.length; i++) {
-			temp[i] = buyEntries[i];
-		}
-		
-		temp[buyEntries.length] = new Offer(price, amount);
-		buyEntries = temp;
-	}
-	
-	public Offer[] getSellEntries() {
+	public List<Offer> getSellEntries() {
 		return this.sellEntries;
 	}
 	
-	public Offer[] getBuyEntries() {
+	public List<Offer> getBuyEntries() {
 		return this.buyEntries;
 	}
 	

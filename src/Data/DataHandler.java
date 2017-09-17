@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 import Engine.Pluton;
 import Orders.Order;
 
@@ -18,18 +20,39 @@ public class DataHandler {
 	public List<Funds> funds;
 	
 	public Map<String, String> volume24h;
+	public Map<String, String> minTicks;
+	public Map<String, String> states;
+	public Map<String, String> peakPrices;
+	public Map<String, String> buyTimestamps;
+	public Map<String, String> buyPrices;
+	public Map<String, String> sellPrices;
+	public Map<String, String> activeOrders;
+	
+	public List<Datapoint> datapoints;
 	
 	private boolean verbose;
 	
 	public DataHandler(boolean verbose, Pluton parent) {
 		this.verbose = verbose;
 		this.parent = parent;
+		
 		this.volume24h = new HashMap<String, String>();
+		this.datapoints = new ArrayList<Datapoint>();
+		this.states = new HashMap<String, String>();
+		this.peakPrices = new HashMap<String, String>();
+		this.buyTimestamps = new HashMap<String, String>();
+		this.buyPrices = new HashMap<String, String>();
+		this.sellPrices = new HashMap<String, String>();
+		this.activeOrders = new HashMap<String, String>();
+
+		this.minTicks = new HashMap<String, String>();
+		this.minTicks.put("BCHUSD", "" + 0.1);
 		
 		orders = new ArrayList<Order>();
 		
 		for(String currency: parent.currencies) {
-			orders.add(new Order(currency.split("/")[1], currency.split("/")[2], verbose));
+			orders.add(new Order(currency.split("/")[1], currency.split("/")[2], this, verbose));
+			states.put(currency.split("/")[1] + currency.split("/")[2], "" + 0);
 		}
 		
 		walls = new ArrayList<Wall>();
@@ -38,12 +61,24 @@ public class DataHandler {
 		funds = new ArrayList<Funds>();
 	}
 	
+	public Datapoint getPreviousDataPoint(String cur1, String cur2) {
+		Datapoint latest = null;
+		for(Datapoint dp: this.datapoints) {
+			if(cur1.equals(dp.cur1) && cur2.equals(dp.cur2)) {
+				latest = dp;
+			}
+		}
+		
+		return latest;
+	}
+	
 	public void loadTickSizes() {
 		setTickSizes(parent.restHandler_cex.getTickSizes());
 	}
 	
 	public void loadFunds() {
-		setFunds(parent.restHandler_cex.getFunds(new String[] { "BTC", "BCH", "ETH" }));
+//		setFunds(parent.restHandler_cex.getFunds(new String[] { "USD", "BTC", "BCH", "ETH" }));
+		//setFunds(parent.restHandler_btf.getFunds(new String[] { "USD", "BTC", "BCH", "ETH" }));
 	}
 	
 	public List<Funds> getFunds() {
@@ -68,6 +103,16 @@ public class DataHandler {
 		}
 	}
 	
+	public double getBuyPrice(String cur1, String cur2) {
+		Order o = getOrder(cur1, cur2);
+		return o.getBuyEntries().get(0).price;
+	}
+	
+	public double getSellPrice(String cur1, String cur2) {
+		Order o = getOrder(cur1, cur2);
+		return o.getSellEntries().get(0).price;
+	}
+	
 	public Order getOrder(String cur1, String cur2) {
 		for(Order orderIterator: orders) {
 			if(cur1.equals(orderIterator.cur1) && cur2.equals(orderIterator.cur2)) {
@@ -83,8 +128,13 @@ public class DataHandler {
 			String cur1 = currency.split("/")[1];
 			String cur2 = currency.split("/")[2];
 			
+			String vol = parent.restHandler_btf.get24HVolume(cur1, cur2).toString();
+			double lastPrice = Double.parseDouble(vol.split(",")[6]);
+			double volumeSelf = Double.parseDouble(vol.split(",")[7]);
+			double volume = lastPrice * volumeSelf;
+			
 			//this.volume24h.put(cur1 + "/" + cur2, "" + parent.dbHandler.get24HVolume(cur1, cur2));
-			this.volume24h.put(cur1 + "/" + cur2, "" + parent.restHandler_btf.get24HVolume(cur1, cur2));
+			this.volume24h.put(cur1 + cur2, "" + volume);
 			
 			
 		}

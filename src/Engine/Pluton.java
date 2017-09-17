@@ -30,7 +30,7 @@ import Scanning.Scanner;
 
 public class Pluton {
 
-	public boolean verbose = true;
+	public boolean verbose = Configuration.VERBOSE;
 	public Rest_CEX restHandler_cex;
 	public Rest_BTF restHandler_btf;
 	private Scanner scanner;
@@ -46,10 +46,14 @@ public class Pluton {
 	public Pluton() {
 		
 		logger = new Logger(Configuration.DEBUG_LOG_FILEPATH, Configuration.TRADE_LOG_FILEPATH);
+
+		for(String currency: Configuration.CURRENCIES) {
+			currencies.add(currency);
+		}
 		
 		dbHandler = new DBHandler();
 		dataHandler = new DataHandler(verbose, this);
-		restHandler_btf = new Rest_BTF();
+		restHandler_btf = new Rest_BTF(verbose);
 		dataHandler.load24HVolume(currencies);
 		
 		funds = new Funds("USD", 1000, 0);
@@ -94,7 +98,7 @@ public class Pluton {
 			System.exit(0);
 		}
 		
-		if(Configuration.MODE.equals("training")) {
+		if(Configuration.MODE.equals("simulation")) {
 			for(String currency: Configuration.CURRENCIES) {
 				//FileLoader fileLoader = new FileLoader(this);
 				
@@ -113,9 +117,42 @@ public class Pluton {
 //				Encog.getInstance().shutdown();
 				HistoryLoader historyLoader = new HistoryLoader(this);
 				
-				//historyLoader.findJumps(currency);
-				historyLoader.findJumpsV2(currency);
+				List<String> jumpLims = new ArrayList<String>();
+				jumpLims.add("" + Configuration.JUMP_LIMIT);
 				
+//				Benchmarking
+//				jumpLims.add("1.007");
+//				jumpLims.add("1.008");
+//				jumpLims.add("1.009");
+//				jumpLims.add("1.01");
+//				jumpLims.add("1.011");
+//				jumpLims.add("1.012");
+//				jumpLims.add("1.015");
+//				jumpLims.add("1.02");
+				
+				List<String> jumpLimVols = new ArrayList<String>();
+				jumpLimVols.add("" + Configuration.JUMP_LIMIT_VOL);
+				
+//				Benchmarking
+//				jumpLimVols.add("5");
+//				jumpLimVols.add("6");
+//				jumpLimVols.add("7");
+//				jumpLimVols.add("8");
+//				jumpLimVols.add("9");
+//				jumpLimVols.add("10");
+//				jumpLimVols.add("11");
+//				jumpLimVols.add("12");
+
+	//			historyLoader.findJumpsV2(currency);
+				
+				for(String jumpLim: jumpLims) {
+					for(String jumpLimVol: jumpLimVols) {
+						Configuration.JUMP_LIMIT = Double.parseDouble(jumpLim);
+						Configuration.JUMP_LIMIT_VOL = Double.parseDouble(jumpLimVol);
+						funds.setAmountAvailable(1000);
+						historyLoader.findJumpsV2(currency);
+					}
+				}
 				
 			}
 			
@@ -123,11 +160,8 @@ public class Pluton {
 			System.exit(0);
 		}
 		
-		for(String currency: Configuration.CURRENCIES) {
-			currencies.add(currency);
-		}
 
-		restHandler_cex = new Rest_CEX(verbose);
+		//restHandler_cex = new Rest_CEX(verbose);
 		
 		//restHandler.getData("https://cex.io/api/currency_limits");
 		
@@ -140,11 +174,11 @@ public class Pluton {
 		scanner = new Scanner(this);
 		scanner.start();
 		
-		analyzer = new Analyzer(verbose, this);
-		analyzer.start();
-
-		missionHandler = new MissionHandler(verbose, this);
-		missionHandler.start();
+//		analyzer = new Analyzer(verbose, this);
+//		analyzer.start();
+//
+//		missionHandler = new MissionHandler(verbose, this);
+//		missionHandler.start();
 	
 	}
 	
