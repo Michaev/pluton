@@ -81,6 +81,48 @@ public class Rest_BTF extends REST {
 		return id;
 	}
 	
+	public long cancelOrder(long orderId) {
+		HttpResponse<JsonNode> jsonResponse = null;
+		
+		String url = "https://api.bitfinex.com/v1/order/cancel";
+		
+		auth.upNonce();
+		JSONObject jo = new JSONObject();
+		jo.put("request", "/v1/order/cancel");
+		jo.put("order_id", orderId);
+		jo.put("signature", auth.getSignature());
+		jo.put("nonce", Long.toString(auth.getNonce()));
+		
+		String payload = jo.toString();
+		
+		String payload_base64 = Base64.getEncoder().encodeToString(payload.getBytes());
+		
+		String payload_sha384hmac = hmacDigest(payload_base64, auth.getSecret(), "HmacSHA384");
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("x-bfx-payload", payload_base64);
+		headers.put("x-bfx-apikey", auth.getApi());
+		headers.put("x-bfx-signature", payload_sha384hmac);
+		
+		try {
+			jsonResponse = Unirest.post(url)
+					  .headers(headers)
+					  .asJson();
+		} catch (UnirestException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("placeOrder: " + jsonResponse.getBody().getObject());
+		
+		long id = -1;
+		try {
+			id = jsonResponse.getBody().getObject().getLong("id");
+		} catch (JSONException e) {
+			System.out.println(jsonResponse);
+		}
+		return id;
+	}
+	
 	public long replaceOrder(long orderId, String cur1, String cur2, String type, double amount, double price) {
 		HttpResponse<JsonNode> jsonResponse = null;
 		
@@ -237,6 +279,42 @@ public class Rest_BTF extends REST {
 		}
 		
 		if(verbose)	System.out.println("getPrivateOrders: " + jsonResponse.getBody().getArray());
+		
+		return jsonResponse.getBody().getArray();
+	}
+	
+	public JSONArray getFunds() {
+		HttpResponse<JsonNode> jsonResponse = null;
+		
+		String url = "https://api.bitfinex.com/v1/balances";
+		System.out.println(url);
+
+		auth.upNonce();
+		JSONObject jo = new JSONObject();
+		jo.put("request", "/v1/balances");
+		jo.put("nonce", Long.toString(auth.getNonce()));
+		
+		String payload = jo.toString();
+		
+		String payload_base64 = Base64.getEncoder().encodeToString(payload.getBytes());
+		
+		String payload_sha384hmac = hmacDigest(payload_base64, auth.getSecret(), "HmacSHA384");
+
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("x-bfx-payload", payload_base64);
+		headers.put("x-bfx-apikey", auth.getApi());
+		headers.put("x-bfx-signature", payload_sha384hmac);
+		
+		try {
+			jsonResponse = Unirest.get(url)
+					  .headers(headers)
+					  .asJson();
+		} catch (UnirestException e) {
+			e.printStackTrace();
+		}
+		
+		if(verbose)	System.out.println("getFunds: " + jsonResponse.getBody().getArray());
 		
 		return jsonResponse.getBody().getArray();
 	}

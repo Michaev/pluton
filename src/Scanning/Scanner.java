@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import Config.Configuration;
 import Data.Datapoint;
+import Data.Funds;
 import Engine.Pluton;
 import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
@@ -38,6 +39,65 @@ public class Scanner {
 				System.out.println("Scanner thread running");
 
 				// parent.dataHandler.loadTickSizes();
+
+				JSONArray pOrders = parent.restHandler_btf.getPrivateOrders();
+				parent.dataHandler.loadFunds();
+
+				boolean ownsCurrency = false;
+				boolean activeSellOrder = false;
+				boolean activeBuyOrder = false;
+				
+				for (String currency : parent.currencies) {
+					
+					String cur1 = currency.split("/")[1];
+					String cur2 = currency.split("/")[2];
+					
+					ownsCurrency = false;
+					activeSellOrder = false;
+					activeBuyOrder = false;
+					
+					for(Funds f: parent.dataHandler.funds) {
+						if(f.getCurrency().equals(cur2) && f.getamount() >= 0.1)
+							ownsCurrency = true;
+					}
+					
+					String orderIdS = "";
+					for(int i = 0; i < pOrders.length(); i++) {
+						JSONObject jOrder = pOrders.getJSONObject(i);
+						System.out.println(jOrder);
+						
+						String symbol = jOrder.getString("symbol").toUpperCase();
+						orderIdS = Long.toString(jOrder.getLong("id"));
+						String oPrice = Double.toString(jOrder.getDouble("price"));
+						String type = jOrder.getString("side");
+						
+						if(symbol.equals(cur1 + cur2)) {
+							parent.dataHandler.activeOrders.put(cur1 + cur2, orderIdS);
+							
+							if(type.equals("sell")) {
+								activeSellOrder = true;
+							}
+							
+							if(type.equals("buy")) {
+								activeBuyOrder = true;
+							}
+						}
+					}
+					
+					if(!ownsCurrency && activeBuyOrder) {
+						parent.restHandler_btf.cancelOrder(Long.parseLong(parent.dataHandler.activeOrders.get(cur1 + cur2)));
+						parent.dataHandler.states.put(cur1 + cur2, "" + 0);
+					}
+				
+					if(ownsCurrency) {
+						if(activeBuyOrder || activeSellOrder)
+							parent.restHandler_btf.cancelOrder(Long.parseLong(parent.dataHandler.activeOrders.get(cur1 + cur2)));
+						
+						parent.dataHandler.states.put(cur1 + cur2, "" + 2);
+						parent.dataHandler.peakPrices.put(cur1 + cur2, "" + parent.dataHandler.getSellPrice(cur1, cur2));
+						parent.dataHandler.buyPrices.put(cur1 + cur2, "" + parent.dataHandler.getBuyPrice(cur1, cur2));
+					}
+				}
 				
 				while (keepRunning) {
 
@@ -52,8 +112,6 @@ public class Scanner {
 //						parent.dataHandler.setOrders(currency.split("/")[1], currency.split("/")[2], currencyData);
 //					}
 					
-					JSONArray pOrders = parent.restHandler_btf.getPrivateOrders();
-					
 					for (String currency : parent.currencies) {
 						
 						String cur1 = currency.split("/")[1];
@@ -67,32 +125,57 @@ public class Scanner {
 						parent.dataHandler.setOrders(currency.split("/")[1], currency.split("/")[2], orders);
 						
 						if(Integer.parseInt(parent.dataHandler.states.get(cur1 + cur2)) == 1) {
-							boolean foundOrder = false;
-							String oPrice = "";
-							String orderId = "";
+						
+							pOrders = parent.restHandler_btf.getPrivateOrders();
 							
+							String orderIdS = "";
+							activeBuyOrder = false;
+							activeSellOrder = false;
 							for(int i = 0; i < pOrders.length(); i++) {
 								JSONObject jOrder = pOrders.getJSONObject(i);
 								System.out.println(jOrder);
 								
 								String symbol = jOrder.getString("symbol").toUpperCase();
-								orderId = Long.toString(jOrder.getLong("id"));
-								oPrice = Double.toString(jOrder.getDouble("price"));
+								orderIdS = Long.toString(jOrder.getLong("id"));
+								String type = jOrder.getString("side");
 								
-								if(symbol.equals(cur1 + cur2) && orderId.equals(parent.dataHandler.activeOrders.get(cur1 + cur2)))
-									foundOrder = true;
-								
+								if(symbol.equals(cur1 + cur2)) {
+									parent.dataHandler.activeOrders.put(cur1 + cur2, orderIdS);
+									
+									if(type.equals("sell")) {
+										activeSellOrder = true;
+									}
+									
+									if(type.equals("buy")) {
+										activeBuyOrder = true;
+									}
+								}
 							}
 							
-							if(!foundOrder) {
-								parent.dataHandler.states.put(cur1 + cur2, "" + 2);
+							if(!activeBuyOrder) {
+								if(parent.dataHandler.getFunds(cur1).getAmountAvailable() > 0.01)
+									parent.dataHandler.states.put(cur1 + cur2, "" + 2);
+								else
+									parent.dataHandler.states.put(cur1 + cur2, "" + 0);
+								
 								parent.dataHandler.activeOrders.remove(cur1 + cur2);
 							}
 							else {
 								double buyPrice = parent.dataHandler.getBuyPrice(cur1, cur2) + Double.parseDouble(parent.dataHandler.minTicks.get(cur1 + cur2));
 								double amount = Configuration.BASE_INVESTING_AMOUNT / buyPrice;
-								long new_orderId = parent.restHandler_btf.replaceOrder(Long.parseLong(orderId), cur1, cur2, "buy", amount, buyPrice);
-								parent.dataHandler.activeOrders.remove(cur1 + cur2);
+								
+								if(buyPrice / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2)) >= Configuration.SLIPPAGE_LIMIT) {
+									// Price grew out of range, cancelling
+									
+									parent.dataHandler.activeOrders.remove(cur1 + cur2);
+									parent.restHandler_btf.cancelOrder(Long.parseLong(orderIdS));
+									parent.dataHandler.states.put(cur1 + cur2, "" + 0);
+									
+									continue;
+								}
+								
+								long new_orderId = parent.restHandler_btf.replaceOrder(Long.parseLong(orderIdS), cur1, cur2, "buy", amount, buyPrice);
+								//parent.dataHandler.activeOrders.remove(cur1 + cur2);
 								parent.dataHandler.activeOrders.put(cur1 + cur2, "" + new_orderId);
 								
 								continue;
@@ -202,8 +285,8 @@ public class Scanner {
 							double tradeGain = (price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2))) - 0.003;
 							parent.logger.logTrade("Total gain: " + tradeGain);
 							
-							parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + ((1000 * tradeGain) - 1000));
-							parent.logger.logTrade("New funds: " + parent.funds.getAmountAvailable());
+							parent.dataHandler.getFunds(cur2).setAmountAvailable(parent.dataHandler.getFunds(cur2).getAmountAvailable() + ((1000 * tradeGain) - 1000));
+							parent.logger.logTrade("New funds: " + parent.dataHandler.getFunds(cur2).getAmountAvailable());
 							parent.dataHandler.states.put(cur1 + cur2, "" + 0);
 						}
 					}

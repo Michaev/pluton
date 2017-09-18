@@ -170,8 +170,8 @@ public class HistoryLoader {
 				
 				gains.add("" + tradeGain);
 				
-				parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + ((1000 * tradeGain) - 1000));
-				parent.logger.logTrade("New funds: " + parent.funds.getAmountAvailable());
+				parent.dataHandler.getFunds(cur2).setAmountAvailable(parent.dataHandler.getFunds(cur2).getAmountAvailable() + ((1000 * tradeGain) - 1000));
+				parent.logger.logTrade("New funds: " + parent.dataHandler.getFunds(cur2).getAmountAvailable());
 				state = 0;
 			}
 			
@@ -182,8 +182,8 @@ public class HistoryLoader {
 					parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start + Configuration.INTERVAL_TICK_GEN) + " for " + price);
 					parent.logger.logTrade("Total gain: " + price / buyPrice);
 					
-					parent.funds.setAmountAvailable(parent.funds.getAmountAvailable() + (1000 * (price / buyPrice) - 1000));
-					parent.logger.logTrade("New funds: " + parent.funds.getAmountAvailable());
+					parent.dataHandler.getFunds(cur2).setAmountAvailable(parent.dataHandler.getFunds(cur2).getAmountAvailable() + (1000 * (price / buyPrice) - 1000));
+					parent.logger.logTrade("New funds: " + parent.dataHandler.getFunds(cur2).getAmountAvailable());
 					
 					state = 0;
 				}
@@ -196,7 +196,7 @@ public class HistoryLoader {
 
 		parent.logger.logCustom("Gain limit: " + Configuration.JUMP_LIMIT, "configs_" + cur1 + "_" + cur2 + ".txt");
 		parent.logger.logCustom("Gain limit vol: " + Configuration.JUMP_LIMIT_VOL, "configs_" + cur1 + "_" + cur2 + ".txt");
-		parent.logger.logCustom("New funds: " + parent.funds.getAmountAvailable(), "configs_" + cur1 + "_" + cur2 + ".txt");
+		parent.logger.logCustom("New funds: " + parent.dataHandler.getFunds(cur2).getAmountAvailable(), "configs_" + cur1 + "_" + cur2 + ".txt");
 		parent.logger.logCustom("Total trades: " + trades, "configs_" + cur1 + "_" + cur2 + ".txt");
 		parent.logger.logCustom("", "configs_" + cur1 + "_" + cur2 + ".txt");
 		

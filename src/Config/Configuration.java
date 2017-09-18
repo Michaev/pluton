@@ -23,8 +23,17 @@ public class Configuration {
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
 	
-	public static double JUMP_LIMIT = 0.995;		// Best for BCH, OMG, SAN, IOT, LTC and XMR
+//	public static double JUMP_LIMIT = 1.009;		// Best for BCH, OMG, SAN, IOT, LTC and XMR
+//	public static double JUMP_LIMIT_VOL = 5;
+//	public static double STOP_LOSS_LIMIT = 0.992; 	// How big percentage loss before dropping
+//	public static double ROI_GOAL = 1.04; 			// How many percentage return on investment to expect per trade
+	
+	// Testing
+	public static double JUMP_LIMIT = 0.995;		
 	public static double JUMP_LIMIT_VOL = 0.001;
+	public static double STOP_LOSS_LIMIT = 0.995;
+	public static double ROI_GOAL = 1.005;
+	public static double SLIPPAGE_LIMIT = 1.004;
 	
 	// Training
 	public static int NN_LATENCY = 5;
@@ -47,9 +56,6 @@ public class Configuration {
 	public static int FLOOR_CEILING_SIG_LIMIT = 600; // How small orders will be ignored when considering walls
 	public static double WALL_TARGET_GAP_LIMIT = 0.8; // How small difference between wall and interval target before acting
 	public static double WALLS_GAP_LIMIT = 0.5; // How small gap between floor and ceiling before acting
-	
-	public static double STOP_LOSS_LIMIT = 0.9999; // How big percentage loss before dropping
-	public static double ROI_GOAL = 1.0003; // How many percentage return on investment to expect per trade
 	
 	public static double BID_ASK_SIG_LIMIT = 0.15; // How much variation in price before altering bid/ask
 

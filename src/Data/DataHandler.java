@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import Engine.Pluton;
@@ -46,7 +47,7 @@ public class DataHandler {
 		this.activeOrders = new HashMap<String, String>();
 
 		this.minTicks = new HashMap<String, String>();
-		this.minTicks.put("BCHUSD", "" + 0.1);
+		this.minTicks.put("BCHUSD", "" + 0.01);
 		
 		orders = new ArrayList<Order>();
 		
@@ -77,8 +78,22 @@ public class DataHandler {
 	}
 	
 	public void loadFunds() {
-//		setFunds(parent.restHandler_cex.getFunds(new String[] { "USD", "BTC", "BCH", "ETH" }));
-		//setFunds(parent.restHandler_btf.getFunds(new String[] { "USD", "BTC", "BCH", "ETH" }));
+		
+		funds.clear();
+		
+		JSONArray jFunds = parent.restHandler_btf.getFunds();
+		
+		for(int i = 0; i < jFunds.length(); i++) {
+			
+			JSONObject jFund = jFunds.getJSONObject(i);
+			String currency = jFund.getString("currency");
+			double amount = jFund.getDouble("amount");
+			double available = jFund.getDouble("available");
+			String type = jFund.getString("type");
+			
+			if(type.equals("exchange"))
+				funds.add(new Funds(currency, available, amount));
+		}
 	}
 	
 	public List<Funds> getFunds() {

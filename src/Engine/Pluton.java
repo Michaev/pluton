@@ -39,7 +39,6 @@ public class Pluton {
 	public DBHandler dbHandler;
 	public Analyzer analyzer;
 	public Logger logger;
-	public Funds funds;
 	
 	public List<String> currencies = new ArrayList<String>();
 	
@@ -55,8 +54,6 @@ public class Pluton {
 		dataHandler = new DataHandler(verbose, this);
 		restHandler_btf = new Rest_BTF(verbose);
 		dataHandler.load24HVolume(currencies);
-		
-		funds = new Funds("USD", 1000, 0);
 		
 		if(Configuration.MODE.equals("loadHistory")) {
 			HistoryLoader historyLoader = new HistoryLoader(this);
@@ -149,7 +146,7 @@ public class Pluton {
 					for(String jumpLimVol: jumpLimVols) {
 						Configuration.JUMP_LIMIT = Double.parseDouble(jumpLim);
 						Configuration.JUMP_LIMIT_VOL = Double.parseDouble(jumpLimVol);
-						funds.setAmountAvailable(1000);
+						dataHandler.getFunds().add(new Funds("USD", 1000, 1000));
 						historyLoader.findJumpsV2(currency);
 					}
 				}

@@ -4,12 +4,12 @@ public class Funds {
 	
 	String currency;
 	double amountAvailable;
-	double amountOrder;
+	double amount;
 
-	public Funds(String currency, double amountAvailable, double amountOrder) {
+	public Funds(String currency, double amountAvailable, double amount) {
 		this.currency = currency;
 		this.amountAvailable = amountAvailable;
-		this.amountOrder = amountOrder;
+		this.amount = amount;
 	}
 
 	public String getCurrency() {
@@ -28,12 +28,12 @@ public class Funds {
 		this.amountAvailable = amountAvailable;
 	}
 
-	public double getAmountOrder() {
-		return amountOrder;
+	public double getamount() {
+		return amount;
 	}
 
-	public void setAmountOrder(double amountOrder) {
-		this.amountOrder = amountOrder;
+	public void setamount(double amount) {
+		this.amount = amount;
 	}
 	
 	
