@@ -62,13 +62,22 @@ public class Rest_BTF extends REST {
 		headers.put("x-bfx-apikey", auth.getApi());
 		headers.put("x-bfx-signature", payload_sha384hmac);
 		
-		try {
-			jsonResponse = Unirest.post(url)
-					  .headers(headers)
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.post(url)
+						  .headers(headers)
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
 		System.out.println("placeOrder: " + jsonResponse.getBody().getObject());
 		
@@ -104,13 +113,22 @@ public class Rest_BTF extends REST {
 		headers.put("x-bfx-apikey", auth.getApi());
 		headers.put("x-bfx-signature", payload_sha384hmac);
 		
-		try {
-			jsonResponse = Unirest.post(url)
-					  .headers(headers)
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.post(url)
+						  .headers(headers)
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
 		System.out.println("placeOrder: " + jsonResponse.getBody().getObject());
 		
@@ -154,13 +172,22 @@ public class Rest_BTF extends REST {
 		headers.put("x-bfx-apikey", auth.getApi());
 		headers.put("x-bfx-signature", payload_sha384hmac);
 		
-		try {
-			jsonResponse = Unirest.post(url)
-					  .headers(headers)
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.post(url)
+						  .headers(headers)
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
 		System.out.println("placeOrder: " + jsonResponse.getBody().getObject());
 		
@@ -187,17 +214,23 @@ public class Rest_BTF extends REST {
 		
 		System.out.println("URL: " + url);
 		
-		try {
-			jsonResponse = Unirest.get(url)
-					  .header("accept", "application/json")
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .header("accept", "application/json")
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
 		jsonResponse.getBody().getArray();
 		
@@ -211,17 +244,23 @@ public class Rest_BTF extends REST {
 		
 		System.out.println("URL: " + url);
 		
-		try {
-			jsonResponse = Unirest.get(url)
-					  .header("accept", "application/json")
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .header("accept", "application/json")
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
 		// jsonResponse.getBody().getArray();
 		
@@ -234,13 +273,20 @@ public class Rest_BTF extends REST {
 		String url = "https://api.bitfinex.com/v2/book/t" + cur1 + cur2 +"/P0";
 		System.out.println(url);
 		
-		try {
-			jsonResponse = Unirest.get(url)
-					  .header("accept", "application/json")
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .header("accept", "application/json")
+						  .asJson();
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
 		if(verbose)	System.out.println("getPublicOrders: " + jsonResponse.getBody().getArray());
 		
@@ -270,13 +316,22 @@ public class Rest_BTF extends REST {
 		headers.put("x-bfx-apikey", auth.getApi());
 		headers.put("x-bfx-signature", payload_sha384hmac);
 		
-		try {
-			jsonResponse = Unirest.get(url)
-					  .headers(headers)
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .headers(headers)
+						  .asJson();
+			
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+				
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} while (jsonResponse == null);
 		
 		if(verbose)	System.out.println("getPrivateOrders: " + jsonResponse.getBody().getArray());
 		
@@ -306,15 +361,23 @@ public class Rest_BTF extends REST {
 		headers.put("x-bfx-apikey", auth.getApi());
 		headers.put("x-bfx-signature", payload_sha384hmac);
 		
-		try {
-			jsonResponse = Unirest.get(url)
-					  .headers(headers)
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .headers(headers)
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
-		if(verbose)	System.out.println("getFunds: " + jsonResponse.getBody().getArray());
+		//if(verbose)	System.out.println("getFunds: " + jsonResponse.getBody().getArray());
 		
 		return jsonResponse.getBody().getArray();
 	}
@@ -326,17 +389,25 @@ public class Rest_BTF extends REST {
 		
 		System.out.println("Get 24H volume URL: " + url);
 		
-		try {
-			jsonResponse = Unirest.get(url)
-					  .header("accept", "application/json")
-					  .asJson();
-		} catch (UnirestException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .header("accept", "application/json")
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
 		
 		jsonResponse.getBody().getArray();
 		

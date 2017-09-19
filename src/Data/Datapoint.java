@@ -13,7 +13,7 @@ public class Datapoint {
 	public String cur2;
 	
 	public Datapoint(String cur1, String cur2, double open, double close, long start, long stop, double gain, double volume) {
-		this.cur1 = cur2;
+		this.cur1 = cur1;
 		this.cur2 = cur2;
 		
 		this.close = close;

@@ -93,7 +93,7 @@ public class DataHandler {
 			String type = jFund.getString("type");
 			
 			if(type.equals("exchange"))
-				funds.add(new Funds(currency, available, amount));
+				funds.add(new Funds(currency.toUpperCase(), available, amount));
 		}
 	}
 	
@@ -103,7 +103,7 @@ public class DataHandler {
 	
 	public Funds getFunds(String currency) {
 		for(Funds funds: getFunds()) {
-			if(funds.currency.equals(currency))
+			if(funds.currency.equals(currency.toUpperCase()))
 				return funds;
 		}
 		

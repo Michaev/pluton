@@ -61,7 +61,7 @@ public class Scanner {
 					activeBuyOrder = false;
 					
 					for(Funds f: parent.dataHandler.funds) {
-						if(f.getCurrency().equals(cur2) && f.getamount() >= 0.1)
+						if(f.getCurrency().equals(cur1) && f.getamount() >= 0.1)
 							ownsCurrency = true;
 					}
 					
@@ -96,6 +96,13 @@ public class Scanner {
 					if(ownsCurrency) {
 						if(activeBuyOrder || activeSellOrder)
 							parent.restHandler_btf.cancelOrder(Long.parseLong(parent.dataHandler.activeOrders.get(cur1 + cur2)));
+						
+						String orders = parent.restHandler_btf.getPublicOrders(currency.split("/")[1],
+								currency.split("/")[2]);
+						
+						orders = orders.substring(2, orders.length()-2);
+						
+						parent.dataHandler.setOrders(currency.split("/")[1], currency.split("/")[2], orders);
 						
 						parent.dataHandler.states.put(cur1 + cur2, "" + 2);
 						parent.dataHandler.peakPrices.put(cur1 + cur2, "" + parent.dataHandler.getBuyPrice(cur1, cur2));
