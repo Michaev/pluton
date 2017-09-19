@@ -200,11 +200,11 @@ public class HistoryLoader {
 		parent.logger.logCustom("Total trades: " + trades, "configs_" + cur1 + "_" + cur2 + ".txt");
 		parent.logger.logCustom("", "configs_" + cur1 + "_" + cur2 + ".txt");
 		
-		System.out.println();
-		System.out.println("List of gains:");
-		gains.sort(Comparator.comparing(Double::parseDouble));
-		for(String g: gains) 
-			parent.logger.logTrade(g);
+//		System.out.println();
+//		System.out.println("List of gains:");
+//		gains.sort(Comparator.comparing(Double::parseDouble));
+//		for(String g: gains) 
+//			parent.logger.logTrade(g);
 	}
 	
 	public void findJumps(String currency) {

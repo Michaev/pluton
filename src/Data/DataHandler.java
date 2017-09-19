@@ -49,6 +49,7 @@ public class DataHandler {
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);
 		this.minTicks.put("IOTUSD", "" + 0.00001);
+		this.minTicks.put("OMGUSD", "" + 0.0001);
 		
 		orders = new ArrayList<Order>();
 		
