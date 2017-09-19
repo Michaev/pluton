@@ -23,15 +23,15 @@ public class Configuration {
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
 	
-	//public static double JUMP_LIMIT = 1.009;		// Best for BCH, OMG, SAN, IOT, LTC and XMR
-	//public static double JUMP_LIMIT_VOL = 0.2;
+	public static double JUMP_LIMIT = 1.009;		// Best for BCH, OMG, SAN, IOT, LTC and XMR
+	public static double JUMP_LIMIT_VOL = 0.2;
 	public static double STOP_LOSS_LIMIT = 0.992; 	// How big percentage loss before dropping
 	public static double ROI_GOAL = 1.04; 			// How many percentage return on investment to expect per trade
 	public static double SLIPPAGE_LIMIT = 1.004;
 	
 	// Testing
-	public static double JUMP_LIMIT = 1.001;		
-	public static double JUMP_LIMIT_VOL = 0.001;
+//	public static double JUMP_LIMIT = 1.001;		
+//	public static double JUMP_LIMIT_VOL = 0.001;
 //	public static double STOP_LOSS_LIMIT = 0.995;
 //	public static double ROI_GOAL = 1.005;
 //	public static double SLIPPAGE_LIMIT = 1.004;
@@ -88,7 +88,7 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
@@ -97,6 +97,6 @@ public class Configuration {
 	
 	// 4. Finished training.
 
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD", "BTF/IOT/USD", "BTF/OMG/USD"); // Use for real testing
+	public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD", "BTF/IOT/USD", "BTF/OMG/USD"); // Use for real testing
 	// None
 }
