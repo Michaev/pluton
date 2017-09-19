@@ -47,7 +47,11 @@ public class Scanner {
 				boolean activeSellOrder = false;
 				boolean activeBuyOrder = false;
 				
+				// Start init
+				
 				for (String currency : parent.currencies) {
+					
+					parent.dataHandler.loadFunds();
 					
 					String cur1 = currency.split("/")[1];
 					String cur2 = currency.split("/")[2];
@@ -94,10 +98,12 @@ public class Scanner {
 							parent.restHandler_btf.cancelOrder(Long.parseLong(parent.dataHandler.activeOrders.get(cur1 + cur2)));
 						
 						parent.dataHandler.states.put(cur1 + cur2, "" + 2);
-						parent.dataHandler.peakPrices.put(cur1 + cur2, "" + parent.dataHandler.getSellPrice(cur1, cur2));
+						parent.dataHandler.peakPrices.put(cur1 + cur2, "" + parent.dataHandler.getBuyPrice(cur1, cur2));
 						parent.dataHandler.buyPrices.put(cur1 + cur2, "" + parent.dataHandler.getBuyPrice(cur1, cur2));
 					}
 				}
+				
+				// End init
 				
 				while (keepRunning) {
 
@@ -256,33 +262,98 @@ public class Scanner {
 							
 							double peakPrice = Double.parseDouble(parent.dataHandler.peakPrices.get(cur1 + cur2));
 							double buyPrice = Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2));
-							
-							// TODO: continue
-							
-							double currentPrice = parent.dbHandler.getCurrentPrice(cur1, cur2, start.getTime(), -1);
+							double currentPrice = parent.dataHandler.getBuyPrice(cur1, cur2);
 							
 							if(currentPrice > peakPrice)
 								parent.dataHandler.peakPrices.put(cur1 + cur2, "" + currentPrice);
 							
 							double lossFromPeak = currentPrice / peakPrice;
 							double gainFromStart = currentPrice / buyPrice;
+							boolean sell = false;
 							
 							if(lossFromPeak <= Configuration.STOP_LOSS_LIMIT && start.getTime() > Long.parseLong(parent.dataHandler.buyTimestamps.get(cur1 + cur2))) {
-								parent.dataHandler.states.put(cur1 + cur2, "" + 3);
 								parent.logger.logTrade(cur1 + "/" + cur2 + ": Price dropped " + lossFromPeak + " at " + parent.timestampToDate(start.getTime()) + ". Selling out. (price dropped below treshold)");
+								sell = true;
 							}
 							
 							if(gainFromStart >= Configuration.ROI_GOAL && start.getTime() > Long.parseLong(parent.dataHandler.buyTimestamps.get(cur1 + cur2))) {
-								parent.dataHandler.states.put(cur1 + cur2, "" + 3);
 								parent.logger.logTrade(cur1 + "/" + cur2 + ": Price increased " + lossFromPeak + " at " + parent.timestampToDate(start.getTime()) + ". Selling out. (price hit ROI goal)");
+								sell = true;
+							}
+							
+							if(sell) {
+								double sellPrice = parent.dataHandler.getSellPrice(cur1, cur2) - Double.parseDouble(parent.dataHandler.minTicks.get(cur1 + cur2));
+								parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start.getTime()) + " for " + sellPrice);
+								long orderId = parent.restHandler_btf.placeOrder(cur1, cur2, "sell", parent.dataHandler.getFunds(cur1).getAmountAvailable(), sellPrice);
+								parent.dataHandler.states.put(cur1 + cur2, "" + 3);
+								parent.dataHandler.activeOrders.put(cur1 + cur2, Long.toString(orderId));
+								parent.dataHandler.sellPrices.put(cur1 + cur2, Double.toString(sellPrice));
 							}
 						}
 						
 						if(Integer.parseInt(parent.dataHandler.states.get(cur1 + cur2)) == 3) {
-							double price = parent.dataHandler.getSellPrice(cur1, cur2);
-							parent.logger.logTrade("Selling " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start.getTime()) + " for " + price);
 							
-							double tradeGain = (price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2))) - 0.003;
+							pOrders = parent.restHandler_btf.getPrivateOrders();
+							
+							String orderIdS = "";
+							activeBuyOrder = false;
+							activeSellOrder = false;
+							double sellPrice = 0;
+							double amount = 0;
+							
+							for(int i = 0; i < pOrders.length(); i++) {
+								JSONObject jOrder = pOrders.getJSONObject(i);
+								System.out.println(jOrder);
+								
+								String symbol = jOrder.getString("symbol").toUpperCase();
+								orderIdS = Long.toString(jOrder.getLong("id"));
+								String type = jOrder.getString("side");
+								
+								if(symbol.equals(cur1 + cur2)) {
+									parent.dataHandler.activeOrders.put(cur1 + cur2, orderIdS);
+									
+									if(type.equals("sell")) {
+										activeSellOrder = true;
+									}
+									
+									if(type.equals("buy")) {
+										activeBuyOrder = true;
+									}
+								}
+							}
+							
+							if(!activeSellOrder) {
+								if(parent.dataHandler.getFunds(cur1).getAmountAvailable() <= 0.01)
+									parent.dataHandler.states.put(cur1 + cur2, "" + 0);
+								else
+									parent.dataHandler.states.put(cur1 + cur2, "" + 2);
+								
+								parent.dataHandler.activeOrders.remove(cur1 + cur2);
+							}
+							else {
+								sellPrice = parent.dataHandler.getSellPrice(cur1, cur2) - Double.parseDouble(parent.dataHandler.minTicks.get(cur1 + cur2));
+								amount = parent.dataHandler.getFunds(cur1).getAmountAvailable();
+								
+								if(Double.parseDouble(parent.dataHandler.sellPrices.get(cur1 + cur2)) / sellPrice >= Configuration.SLIPPAGE_LIMIT) {
+									// Price grew out of range, dumping on market
+									
+									double dumpPrice = parent.dataHandler.getBuyPrice(cur1, cur2);
+									long new_orderId = parent.restHandler_btf.replaceOrder(Long.parseLong(orderIdS), cur1, cur2, "sell", amount, dumpPrice);
+									parent.dataHandler.activeOrders.put(cur1 + cur2, Long.toString(new_orderId));
+									parent.dataHandler.states.put(cur1 + cur2, "" + 0);
+									parent.logger.logTrade("Dumping " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start.getTime()) + " for " + dumpPrice);
+									
+									continue;
+								}
+								
+								long new_orderId = parent.restHandler_btf.replaceOrder(Long.parseLong(orderIdS), cur1, cur2, "sell", amount, sellPrice);
+								//parent.dataHandler.activeOrders.remove(cur1 + cur2);
+								parent.dataHandler.activeOrders.put(cur1 + cur2, "" + new_orderId);
+								
+								continue;
+							}
+							
+							double tradeGain = (sellPrice / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2))) - 0.003;
 							parent.logger.logTrade("Total gain: " + tradeGain);
 							
 							parent.dataHandler.getFunds(cur2).setAmountAvailable(parent.dataHandler.getFunds(cur2).getAmountAvailable() + ((1000 * tradeGain) - 1000));
