@@ -200,7 +200,7 @@ public class Pluton {
 		Date d = new Date();
 		d.setTime(timestamp);
 		
-		return d.toGMTString();
+		return d.toLocaleString();
 	}
 	
 	
