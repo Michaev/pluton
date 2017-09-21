@@ -13,6 +13,7 @@ import AI.SunSpotTimeseries;
 import Analysis.Analyzer;
 import Analysis.History.HistoryLoader;
 import Config.Configuration;
+import Config.CurrencyConfigs;
 import DB.DBHandler;
 import Data.DataHandler;
 import Data.FileLoader;
@@ -115,22 +116,26 @@ public class Pluton {
 				HistoryLoader historyLoader = new HistoryLoader(this);
 				
 				List<String> jumpLims = new ArrayList<String>();
-				jumpLims.add("" + Configuration.JUMP_LIMIT);
+			//	jumpLims.add("" + Configuration.JUMP_LIMIT);
 				
-//				Benchmarking
+				// Benchmarking
+//				jumpLims.add("1.003");
+//				jumpLims.add("1.004");
+//				jumpLims.add("1.005");
+//				jumpLims.add("1.006");
 //				jumpLims.add("1.007");
-//				jumpLims.add("1.008");
-//				jumpLims.add("1.009");
-//				jumpLims.add("1.01");
-//				jumpLims.add("1.011");
-//				jumpLims.add("1.012");
-//				jumpLims.add("1.015");
-//				jumpLims.add("1.02");
+				jumpLims.add("1.008");
+				jumpLims.add("1.009");
+				jumpLims.add("1.01");
+				jumpLims.add("1.011");
+				jumpLims.add("1.012");
+				jumpLims.add("1.015");
+				jumpLims.add("1.02");
 				
 				List<String> jumpLimVols = new ArrayList<String>();
-				jumpLimVols.add("" + Configuration.JUMP_LIMIT_VOL);
+			//	jumpLimVols.add("" + Configuration.JUMP_LIMIT_VOL);
 				
-//				Benchmarking
+				// Benchmarking
 //				jumpLimVols.add("5");
 //				jumpLimVols.add("6");
 //				jumpLimVols.add("7");
@@ -138,10 +143,12 @@ public class Pluton {
 //				jumpLimVols.add("9");
 //				jumpLimVols.add("10");
 //				jumpLimVols.add("11");
-//				jumpLimVols.add("12");
+				jumpLimVols.add("12");
+				jumpLimVols.add("13");
+				jumpLimVols.add("14");
+				jumpLimVols.add("18");
+				jumpLimVols.add("22");
 
-	//			historyLoader.findJumpsV2(currency);
-				
 				for(String jumpLim: jumpLims) {
 					for(String jumpLimVol: jumpLimVols) {
 						Configuration.JUMP_LIMIT = Double.parseDouble(jumpLim);
@@ -168,6 +175,16 @@ public class Pluton {
 		//auth.upNonce();
 		//restHandler.postData("https://cex.io/api/order_book/BTC/USD/", new String[] { auth.getApi(), auth.getSignature(), "" + auth.getNonce() });
 
+		Configuration.currencyConfig.put("BCHUSD", new CurrencyConfigs(new double[] {1.003, 2, 0.992, 1.04, 1.004} , 30000));
+		Configuration.currencyConfig.put("DSHUSD", new CurrencyConfigs(new double[] {1.009, 2, 0.992, 1.04, 1.004}, 30000));
+		Configuration.currencyConfig.put("IOTUSD", new CurrencyConfigs(new double[] {1.009, 2, 0.992, 1.04, 1.004}, 30000));
+		Configuration.currencyConfig.put("XMRUSD", new CurrencyConfigs(new double[] {1.009, 1.5, 0.992, 1.04, 1.004}, 30000));
+		Configuration.currencyConfig.put("SANUSD", new CurrencyConfigs(new double[] {1.015, 2, 0.992, 1.04, 1.004}, 300000));
+		Configuration.currencyConfig.put("OMGUSD", new CurrencyConfigs(new double[] {1.008, 2, 0.992, 1.04, 1.004}, 30000));
+
+		Configuration.currencyConfig.put("ETHUSD", new CurrencyConfigs(new double[] {1.008, 2, 0.992, 1.04, 1.004}, 30000));
+		Configuration.currencyConfig.put("LTCUSD", new CurrencyConfigs(new double[] {1.007, 2, 0.992, 1.04, 1.004}, 30000));
+		
 		scanner = new Scanner(this);
 		scanner.start();
 		

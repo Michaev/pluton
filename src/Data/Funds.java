@@ -28,11 +28,11 @@ public class Funds {
 		this.amountAvailable = amountAvailable;
 	}
 
-	public double getamount() {
+	public double getAmount() {
 		return amount;
 	}
 
-	public void setamount(double amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
 	}
 	

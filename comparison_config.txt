@@ -1,0 +1,21 @@
+BTC			BCH			ETC			ETH			DSH			IOT			XMR			SAN			OMG			LTC
+
+NA			30sec		NA			30sec		30sec		30sec		30sec		5min		30sec		30sec
+NA			1.007		NA			1.008		1.009		1.009		1.009		1.015		1.008		1.007
+NA			5.0			NA			5.0			5.0			5.0			3.0			5.0			5.0			5.0
+												
+			2084					1082		1253		1762		1455		1242		1714		1247
+			572						70			166			482			510			128			546			124
+			
+			
+30sec		30sec								30sec		30sec		30sec		30sec		30sec
+NP			1.003								1.003		1.003		1.004		NP			NP			
+			5.0									5.0			8.0			8.0						
+			2540								1174		1633		1264					
+			1034								444			587			689						
+
+5min		5min								5min		5min		5min		5min		5min
+NP			NP									NP			NP			1.011		1.015		NP
+																		12.0		14.0		
+																		1221		1149		
+																		38			32			

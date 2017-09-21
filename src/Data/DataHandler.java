@@ -50,6 +50,10 @@ public class DataHandler {
 		this.minTicks.put("BCHUSD", "" + 0.01);
 		this.minTicks.put("IOTUSD", "" + 0.00001);
 		this.minTicks.put("OMGUSD", "" + 0.0001);
+		this.minTicks.put("XMRUSD", "" + 0.001);
+		this.minTicks.put("SANUSD", "" + 0.0001);
+		this.minTicks.put("DSHUSD", "" + 0.01);
+		this.minTicks.put("BTCUSD", "" + 0.1);
 		
 		orders = new ArrayList<Order>();
 		

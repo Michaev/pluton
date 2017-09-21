@@ -35,7 +35,7 @@ public class MissionHandler {
 			String cur1 = currency.split("/")[1];
 			String cur2 = currency.split("/")[2];
 			
-			double amountOrders = parent.dataHandler.getFunds(cur1).getamount() - parent.dataHandler.getFunds(cur1).getAmountAvailable();
+			double amountOrders = parent.dataHandler.getFunds(cur1).getAmount() - parent.dataHandler.getFunds(cur1).getAmountAvailable();
 			
 			if(amountOrders > 0) 
 				continue;

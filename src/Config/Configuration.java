@@ -1,14 +1,16 @@
 package Config;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Configuration {
 	
 	//public static String MODE = "loadHistory";			// Stage 1 - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
-	public static String MODE = "simulation";				// Stage 3 - Simulate strategy
-	//public static String MODE = "pluton";				// Stage 4 - let's roll
+	//public static String MODE = "simulation";				// Stage 3 - Simulate strategy
+	public static String MODE = "pluton";				// Stage 4 - let's roll
 
 	//public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.25); // Fifteen second intervals
 	public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.5); // Thirty second intervals
@@ -23,11 +25,13 @@ public class Configuration {
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
 	
-	public static double JUMP_LIMIT = 1.009;		// Best for BCH, OMG, SAN, IOT, LTC and XMR
-	public static double JUMP_LIMIT_VOL = 1;
+	public static double JUMP_LIMIT = 1.003;
+	public static double JUMP_LIMIT_VOL = 5;
 	public static double STOP_LOSS_LIMIT = 0.992; 	// How big percentage loss before dropping
 	public static double ROI_GOAL = 1.04; 			// How many percentage return on investment to expect per trade
 	public static double SLIPPAGE_LIMIT = 1.004;
+	
+	public static Map<String, CurrencyConfigs> currencyConfig = new HashMap<String, CurrencyConfigs>();
 	
 	// Testing
 //	public static double JUMP_LIMIT = 1.001;		
@@ -92,14 +96,24 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/EOS/USD");
 	
 
-	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD", "BTF/BTC/USD");
+	
 
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/LTC/USD", "BTF/OMG/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
+
+	public static List<String> CURRENCIES = Arrays.asList(
+			"BTF/XMR/USD",
+			"BTF/OMG/USD",
+			"BTF/IOT/USD",
+			"BTF/SAN/USD",
+			"BTF/DSH/USD", 
+			"BTF/BCH/USD");
 	
 	// 4. Finished training.
 
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD", "BTF/IOT/USD", "BTF/OMG/USD"); // Use for real testing
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD", "BTF/IOT/USD"); // Use for real testing
 	// None
 }
