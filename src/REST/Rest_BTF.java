@@ -329,7 +329,7 @@ public class Rest_BTF extends REST {
 				jsonResponse = Unirest.get(url)
 						  .header("accept", "application/json")
 						  .asJson();
-				if(jsonResponse == null) {
+				if(jsonResponse == null || jsonResponse.getBody().getArray().toString().contains("error")) {
 					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
 				}
 			} catch (UnirestException e) {
@@ -337,7 +337,7 @@ public class Rest_BTF extends REST {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		} while(jsonResponse == null);
+		} while(jsonResponse == null || jsonResponse.getBody().getArray().toString().contains("error"));
 		
 		if(verbose)	System.out.println("getPublicOrders: " + jsonResponse.getBody().getArray());
 		
