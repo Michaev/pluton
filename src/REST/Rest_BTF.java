@@ -141,6 +141,57 @@ public class Rest_BTF extends REST {
 		return id;
 	}
 	
+	public double getExecutionPrice(long orderId) {
+		HttpResponse<JsonNode> jsonResponse = null;
+		
+		String url = "https://api.bitfinex.com/v1/order/status";
+		
+		auth.upNonce();
+		JSONObject jo = new JSONObject();
+		jo.put("request", "/v1/order/status");
+		jo.put("order_id", orderId);
+		jo.put("signature", auth.getSignature());
+		jo.put("nonce", Long.toString(auth.getNonce()));
+		
+		String payload = jo.toString();
+		
+		String payload_base64 = Base64.getEncoder().encodeToString(payload.getBytes());
+		
+		String payload_sha384hmac = hmacDigest(payload_base64, auth.getSecret(), "HmacSHA384");
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("x-bfx-payload", payload_base64);
+		headers.put("x-bfx-apikey", auth.getApi());
+		headers.put("x-bfx-signature", payload_sha384hmac);
+		
+		do {
+			try {
+				jsonResponse = Unirest.post(url)
+						  .headers(headers)
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
+		
+		//System.out.println("getExecutionPrice: " + jsonResponse.getBody().getObject());
+		
+		double price = -1;
+		try {
+			price = jsonResponse.getBody().getObject().getLong("avg_execution_price");
+		} catch (JSONException e) {
+			System.out.println(jsonResponse);
+		}
+		return price;
+	}
+	
 	public long replaceOrder(long orderId, String cur1, String cur2, String type, double amount, double price) {
 		HttpResponse<JsonNode> jsonResponse = null;
 		

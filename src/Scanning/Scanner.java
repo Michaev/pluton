@@ -135,7 +135,7 @@ public class Scanner {
 						if((sequence * Configuration.SCANNER_INTERVAL) % Configuration.currencyConfig.get(cur1 + cur2).getInterval_tick_gen() != 0)
 							continue;
 						
-						parent.logger.logDebug("Running scanner on " + cur1 + "/" + cur2 + " at sequence " + sequence);
+						// parent.logger.logDebug("Running scanner on " + cur1 + "/" + cur2 + " at sequence " + sequence);
 						
 						String orders = parent.restHandler_btf.getPublicOrders(currency.split("/")[1],
 								currency.split("/")[2]);
@@ -313,6 +313,7 @@ public class Scanner {
 							activeBuyOrder = false;
 							activeSellOrder = false;
 							double sellPrice = 0;
+							double executionPrice = 0;
 							double amount = 0;
 							
 							for(int i = 0; i < pOrders.length(); i++) {
@@ -342,7 +343,12 @@ public class Scanner {
 								else
 									parent.dataHandler.states.put(cur1 + cur2, "" + 2);
 								
+								executionPrice = parent.restHandler_btf.getExecutionPrice(Long.parseLong(parent.dataHandler.activeOrders.get(cur1 + cur2)));
 								parent.dataHandler.activeOrders.remove(cur1 + cur2);
+								
+								double tradeGain = (executionPrice / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2))) - 0.003;
+								parent.logger.logTrade("Total gain: " + tradeGain);
+								parent.dataHandler.states.put(cur1 + cur2, "" + 0);
 							}
 							else {
 								sellPrice = parent.dataHandler.getSellPrice(cur1, cur2) - Double.parseDouble(parent.dataHandler.minTicks.get(cur1 + cur2));
@@ -353,10 +359,14 @@ public class Scanner {
 									
 									double dumpPrice = parent.dataHandler.getBuyPrice(cur1, cur2);
 									long new_orderId = parent.restHandler_btf.replaceOrder(Long.parseLong(orderIdS), cur1, cur2, "sell", amount, dumpPrice);
+									executionPrice = parent.restHandler_btf.getExecutionPrice(new_orderId);
 									parent.dataHandler.activeOrders.put(cur1 + cur2, Long.toString(new_orderId));
 									parent.dataHandler.states.put(cur1 + cur2, "" + 0);
 									parent.logger.logTrade("Dumping " + cur1 + "/" + cur2 + " at " + parent.timestampToDate(start.getTime()) + " for " + dumpPrice);
 									
+									double tradeGain = (executionPrice / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2))) - 0.003;
+									parent.logger.logTrade("Total gain: " + tradeGain);
+									parent.dataHandler.states.put(cur1 + cur2, "" + 0);
 									continue;
 								}
 								
@@ -366,11 +376,6 @@ public class Scanner {
 								
 								continue;
 							}
-							
-							sellPrice = Double.parseDouble(parent.dataHandler.sellPrices.get(cur1 + cur2));
-							double tradeGain = (sellPrice / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2))) - 0.003;
-							parent.logger.logTrade("Total gain: " + tradeGain);
-							parent.dataHandler.states.put(cur1 + cur2, "" + 0);
 						}
 					}
 
