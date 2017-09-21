@@ -367,11 +367,9 @@ public class Scanner {
 								continue;
 							}
 							
+							sellPrice = Double.parseDouble(parent.dataHandler.sellPrices.get(cur1 + cur2));
 							double tradeGain = (sellPrice / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2))) - 0.003;
 							parent.logger.logTrade("Total gain: " + tradeGain);
-							
-							parent.dataHandler.getFunds(cur2).setAmountAvailable(parent.dataHandler.getFunds(cur2).getAmountAvailable() + ((1000 * tradeGain) - 1000));
-							parent.logger.logTrade("New funds: " + parent.dataHandler.getFunds(cur2).getAmountAvailable());
 							parent.dataHandler.states.put(cur1 + cur2, "" + 0);
 						}
 					}
