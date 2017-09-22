@@ -28,6 +28,11 @@ public class DataHandler {
 	public Map<String, String> buyPrices;
 	public Map<String, String> sellPrices;
 	public Map<String, String> activeOrders;
+	public Map<String, List<Double>> historyMACD_prices;
+	public Map<String, List<Double>> historyMACD_EMA1;
+	public Map<String, List<Double>> historyMACD_EMA2;
+	public Map<String, List<Double>> historyMACD_macd;
+	public Map<String, List<Double>> historyMACD_signal;
 	
 	public List<Datapoint> datapoints;
 	
@@ -45,6 +50,11 @@ public class DataHandler {
 		this.buyPrices = new HashMap<String, String>();
 		this.sellPrices = new HashMap<String, String>();
 		this.activeOrders = new HashMap<String, String>();
+		this.historyMACD_prices = new HashMap<String, List<Double>>();
+		this.historyMACD_EMA1 = new HashMap<String, List<Double>>();
+		this.historyMACD_EMA2 = new HashMap<String, List<Double>>();
+		this.historyMACD_macd = new HashMap<String, List<Double>>();
+		this.historyMACD_signal = new HashMap<String, List<Double>>();
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);

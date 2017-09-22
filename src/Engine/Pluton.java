@@ -23,6 +23,7 @@ import MarketBuildTraining.MarketEvaluate;
 import MarketBuildTraining.MarketPredict;
 import MarketBuildTraining.MarketPrune;
 import MarketBuildTraining.MarketTrain;
+import Mission.MACDAgent;
 import Mission.MissionHandler;
 import Output.Logger;
 import REST.Rest_BTF;
@@ -161,6 +162,14 @@ public class Pluton {
 			}
 			
 			logger.logDebug("Finished training");
+			System.exit(0);
+		}
+		
+		if(Configuration.MODE.equals("simulation_MACD")) {
+			MACDAgent macdAgent = new MACDAgent(this);
+			macdAgent.start();
+			
+			logger.logDebug("Finished loading MACD history");
 			System.exit(0);
 		}
 		

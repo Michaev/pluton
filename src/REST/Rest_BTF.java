@@ -344,6 +344,34 @@ public class Rest_BTF extends REST {
 		return jsonResponse.getBody().getArray().toString();
 	}
 	
+	public double getLastPrice(String cur1, String cur2, long timestamp) {
+		HttpResponse<JsonNode> jsonResponse = null;
+		
+		String url = "https://api.bitfinex.com/v2/trades/t" + cur1 + cur2 + "/hist?start=" + timestamp + "&limit=1&sort=1";
+		System.out.println(url);
+		
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .header("accept", "application/json")
+						  .asJson();
+				if(jsonResponse == null || jsonResponse.getBody().getArray().toString().contains("error")) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null || jsonResponse.getBody().getArray().toString().contains("error"));
+		
+		if(verbose)	System.out.println(jsonResponse.getBody().getArray().getJSONArray(0).get(3));
+		
+		double price = Double.parseDouble(jsonResponse.getBody().getArray().getJSONArray(0).get(3).toString());
+		
+		return price;
+	}
+	
 	public JSONArray getPrivateOrders() {
 		HttpResponse<JsonNode> jsonResponse = null;
 		

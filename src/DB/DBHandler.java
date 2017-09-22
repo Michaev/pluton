@@ -51,6 +51,21 @@ public class DBHandler {
 		}
 	}
 	
+	public void createMACDTable(String cur1, String cur2) {
+		try {
+			String sql = "drop table if exists history_MACD_" + cur1 + "_" + cur2;
+			stm.executeUpdate(sql);
+			
+			sql = " create table if not exists history_MACD_" + cur1 + "_" + cur2 + " (timestamp bigint, price double)";
+			System.out.println("Creating MACD table for " + cur1 + ", " + cur2);
+			stm.executeUpdate(sql);
+			conn.commit();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void createDataPointsTable(String cur1, String cur2, long intervals) {
 		try {
 			String sql = "drop table if exists datapoints_" + cur1 + "_" + cur2 + "_" + intervals;
@@ -359,6 +374,24 @@ public class DBHandler {
 		try {
 			String sql = "INSERT INTO datapoints_" + cur1 + "_" + cur2 + "_" + intervals + " (start, stop, gain, low, high, volume) values ("
 					+ start + ", " + stop + ", " + gain + ", " + low + ", " + high + ", " + volume + ")";
+		
+			//System.out.println("Insert data points update :" + sql);
+			stm.executeUpdate(sql);
+			conn.commit();
+			
+		} catch (BatchUpdateException bue) {
+			bue.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void addMACDData(String cur1, String cur2, long timestamp, double price) {
+		
+		try {
+			String sql = "INSERT INTO history_MACD_" + cur1 + "_" + cur2 + " (timestamp, price) values ("
+					+ timestamp + ", " + price + ")";
 		
 			//System.out.println("Insert data points update :" + sql);
 			stm.executeUpdate(sql);
