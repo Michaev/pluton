@@ -347,7 +347,7 @@ public class Rest_BTF extends REST {
 	public double getLastPrice(String cur1, String cur2, long timestamp) {
 		HttpResponse<JsonNode> jsonResponse = null;
 		
-		String url = "https://api.bitfinex.com/v2/trades/t" + cur1 + cur2 + "/hist?start=" + timestamp + "&limit=1&sort=1";
+		String url = "https://api.bitfinex.com/v2/trades/t" + cur1 + cur2 + "/hist?end=" + timestamp + "&limit=1";
 		System.out.println(url);
 		
 		do {
@@ -364,6 +364,12 @@ public class Rest_BTF extends REST {
 				e.printStackTrace();
 			}
 		} while(jsonResponse == null || jsonResponse.getBody().getArray().toString().contains("error"));
+		
+		try {
+			jsonResponse.getBody().getArray().getJSONArray(0).get(3).toString();
+		} catch (JSONException e) {
+			System.out.println(jsonResponse.getBody().getArray().getJSONArray(0).get(3).toString());
+		}
 		
 		if(verbose)	System.out.println(jsonResponse.getBody().getArray().getJSONArray(0).get(3));
 		
