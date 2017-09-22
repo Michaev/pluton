@@ -93,9 +93,9 @@ public class Configuration {
 	
 	// 3. Training.
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/IOT/USD", "BTF/LTC/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
