@@ -3,9 +3,11 @@ package REST;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Mac;
@@ -376,6 +378,38 @@ public class Rest_BTF extends REST {
 		double price = Double.parseDouble(jsonResponse.getBody().getArray().getJSONArray(0).get(3).toString());
 		
 		return price;
+	}
+	
+	public JSONArray getPriceIntervals(String cur1, String cur2, long start) {
+		HttpResponse<JsonNode> jsonResponse = null;
+		
+		String url = "https://api.bitfinex.com/v2/trades/t" + cur1 + cur2 + "/hist?start=" + start + "&limit=1000&sort=1";
+		System.out.println(url);
+		
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .header("accept", "application/json")
+						  .asJson();
+				if(jsonResponse == null || jsonResponse.getBody().getArray().toString().contains("error")) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null || jsonResponse.getBody().getArray().toString().contains("error"));
+		
+		try {
+			jsonResponse.getBody().getArray().getJSONArray(0).get(3).toString();
+		} catch (JSONException e) {
+			System.out.println(jsonResponse.getBody().getArray().getJSONArray(0).get(3).toString());
+		}
+		
+		if(verbose)	System.out.println(jsonResponse.getBody().getArray());
+		
+		return jsonResponse.getBody().getArray();
 	}
 	
 	public JSONArray getPrivateOrders() {

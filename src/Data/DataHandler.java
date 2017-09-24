@@ -33,6 +33,15 @@ public class DataHandler {
 	public Map<String, List<Double>> historyMACD_EMA2;
 	public Map<String, List<Double>> historyMACD_macd;
 	public Map<String, List<Double>> historyMACD_signal;
+	public Map<String, List<Double>> historyRSValues;
+	public Map<String, List<Double>> historyRSIValues;
+	public Map<String, List<Double>> historyRSIGain;
+	public Map<String, List<Double>> historyRSILoss;
+	public Map<String, Boolean> macd_direction;
+	public Map<String, Double> macd_funds;
+	
+	public Map<String, Boolean> rsi_direction;
+	public Map<String, Double> rsi_funds;
 	
 	public List<Datapoint> datapoints;
 	
@@ -55,6 +64,12 @@ public class DataHandler {
 		this.historyMACD_EMA2 = new HashMap<String, List<Double>>();
 		this.historyMACD_macd = new HashMap<String, List<Double>>();
 		this.historyMACD_signal = new HashMap<String, List<Double>>();
+		this.historyRSValues = new HashMap<String, List<Double>>();
+		this.historyRSIValues = new HashMap<String, List<Double>>();
+		this.historyRSIGain = new HashMap<String, List<Double>>();
+		this.historyRSILoss = new HashMap<String, List<Double>>();
+		this.macd_direction = new HashMap<String, Boolean>();
+		this.macd_funds = new HashMap<String, Double>();
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);

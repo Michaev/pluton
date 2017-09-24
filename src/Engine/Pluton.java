@@ -55,7 +55,6 @@ public class Pluton {
 		dbHandler = new DBHandler();
 		dataHandler = new DataHandler(verbose, this);
 		restHandler_btf = new Rest_BTF(verbose);
-		dataHandler.load24HVolume(currencies);
 		
 		if(Configuration.MODE.equals("loadHistory")) {
 			HistoryLoader historyLoader = new HistoryLoader(this);
@@ -193,7 +192,8 @@ public class Pluton {
 
 		Configuration.currencyConfig.put("ETHUSD", new CurrencyConfigs(new double[] {1.008, 2, 0.992, 1.04, 1.004}, 30000));
 		Configuration.currencyConfig.put("LTCUSD", new CurrencyConfigs(new double[] {1.007, 2, 0.992, 1.04, 1.004}, 30000));
-		
+
+		dataHandler.load24HVolume(currencies);
 		scanner = new Scanner(this);
 		scanner.start();
 		
