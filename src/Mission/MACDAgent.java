@@ -240,7 +240,7 @@ public class MACDAgent {
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI SMA: " + stochSMA);
 		
 		int direction = parent.dataHandler.rsi_direction.get(cur1 + cur2);
-		if(stochRSI > stochSMA && (direction == 1)) {
+		if(stochRSI - 2 > stochSMA && (direction == 1)) {
 			
 				parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "_rsi.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2, Double.toString(price));
@@ -254,7 +254,7 @@ public class MACDAgent {
 			
 				parent.dataHandler.rsi_direction.put(cur1 + cur2, 0);
 		}
-		else if(stochRSI < stochSMA && (direction == 0 || direction == -1)) {
+		else if(stochRSI + 2 < stochSMA && (direction == 0 || direction == -1)) {
 			
 				parent.logger.logCustom("Buy signal at " + price, cur1 + cur2 + "_rsi.txt");
 				parent.dataHandler.buyPrices.put(cur1 + cur2 + "rsi", Double.toString(price));
@@ -340,7 +340,7 @@ public class MACDAgent {
 		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
 		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.02 && (direction == 1)) {
 			
-				parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "macd.txt");
+				parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "_macd.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2, Double.toString(price));
 				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "macd"));
 				gain -= 0.004;
