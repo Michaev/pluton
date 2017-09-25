@@ -37,10 +37,11 @@ public class DataHandler {
 	public Map<String, List<Double>> historyRSIValues;
 	public Map<String, List<Double>> historyRSIGain;
 	public Map<String, List<Double>> historyRSILoss;
-	public Map<String, Boolean> macd_direction;
+	public Map<String, List<Double>> historyStochRSI;
+	public Map<String, Integer> macd_direction;
 	public Map<String, Double> macd_funds;
 	
-	public Map<String, Boolean> rsi_direction;
+	public Map<String, Integer> rsi_direction;
 	public Map<String, Double> rsi_funds;
 	
 	public List<Datapoint> datapoints;
@@ -68,8 +69,11 @@ public class DataHandler {
 		this.historyRSIValues = new HashMap<String, List<Double>>();
 		this.historyRSIGain = new HashMap<String, List<Double>>();
 		this.historyRSILoss = new HashMap<String, List<Double>>();
-		this.macd_direction = new HashMap<String, Boolean>();
+		this.historyStochRSI = new HashMap<String, List<Double>>();
+		this.macd_direction = new HashMap<String, Integer>();
 		this.macd_funds = new HashMap<String, Double>();
+		this.rsi_direction = new HashMap<String, Integer>();
+		this.rsi_funds = new HashMap<String, Double>();
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);

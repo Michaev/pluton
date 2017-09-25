@@ -43,7 +43,7 @@ public class MACDAgent {
 			parent.dataHandler.historyMACD_EMA2.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.historyMACD_macd.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.historyMACD_signal.put(cur1 + cur2, new ArrayList<Double>());
-			parent.dataHandler.macd_direction.put(cur1 + cur2, false);
+			parent.dataHandler.macd_direction.put(cur1 + cur2, -1);
 			parent.dataHandler.macd_funds.put(cur1 + cur2, (double)1000);
 			
 			
@@ -128,13 +128,17 @@ public class MACDAgent {
 		List<Double> rsiValues = new ArrayList<Double>();
 		List<Double> rsiGains = new ArrayList<Double>();
 		List<Double> rsiLosses = new ArrayList<Double>();
+		List<Double> stochRsi = new ArrayList<Double>();
 		List<Double> prices = parent.dataHandler.historyMACD_prices.get(cur1 + cur2);
 		
 		parent.dataHandler.historyRSValues.put(cur1 + cur2, rsValues);
 		parent.dataHandler.historyRSIValues.put(cur1 + cur2, rsiValues);
 		parent.dataHandler.historyRSIGain.put(cur1 + cur2, rsiGains);
 		parent.dataHandler.historyRSILoss.put(cur1 + cur2, rsiLosses);
+		parent.dataHandler.historyStochRSI.put(cur1 + cur2, stochRsi);
 		
+		parent.dataHandler.rsi_direction.put(cur1 + cur2, -1);
+		parent.dataHandler.rsi_funds.put(cur1 + cur2, 1000.0);
 		
 		for(int i = 1; i < Configuration.RSI1 + 1; i++) {
 			double gain = parent.dataHandler.historyMACD_prices.get(cur1 + cur2).get(i) - parent.dataHandler.historyMACD_prices.get(cur1 + cur2).get(i-1);
@@ -179,9 +183,18 @@ public class MACDAgent {
 			
 			System.out.println("New RS: " + rsValues.get(rsValues.size() - 1));
 			System.out.println("New RSI: " + rsiValues.get(rsiValues.size() - 1));
+			
+			double lowestRSI = getEdgeRSI(cur1, cur2, 0);
+			double highestRSI = getEdgeRSI(cur1, cur2, 1);
+			
+			double stochRSI = ((rsiValues.get(rsiValues.size()-1) - lowestRSI) / (highestRSI - lowestRSI)) * 100;
+			stochRsi.add(stochRSI);
+			
+			double stochSMA = getSMA(stochRsi, Configuration.RSISTOCH2);
+			
+			System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI: " + stochRSI);
+			System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI SMA: " + stochSMA);
 		}
-
-		
 	}
 	
 	private void calculateRSI(String cur1, String cur2) {
@@ -190,6 +203,8 @@ public class MACDAgent {
 		List<Double> rsiLosses = parent.dataHandler.historyRSILoss.get(cur1 + cur2);
 		List<Double> rsValues = parent.dataHandler.historyRSValues.get(cur1 + cur2);
 		List<Double> rsiValues = parent.dataHandler.historyRSIValues.get(cur1 + cur2);
+		List<Double> stochRsiValues = parent.dataHandler.historyStochRSI.get(cur1 + cur2);
+		double price = prices.get(prices.size()-1);
 		
 		double prevGain = rsiGains.get(rsiGains.size()-1);
 		double gain = prices.get(prices.size()-1) - prices.get(prices.size()-2);
@@ -213,6 +228,82 @@ public class MACDAgent {
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": RS: " + (rsValues.get(rsValues.size() -1)));
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": RSI: " + (rsiValues.get(rsiValues.size() -1)));
 		
+		double lowestRSI = getEdgeRSI(cur1, cur2, 0);
+		double highestRSI = getEdgeRSI(cur1, cur2, 1);
+		
+		double stochRSI = ((rsiValues.get(rsiValues.size()-1) - lowestRSI) / (highestRSI - lowestRSI)) * 100;
+		stochRsiValues.add(stochRSI);
+		
+		double stochSMA = getSMA(stochRsiValues, Configuration.RSISTOCH2);
+		
+		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI: " + stochRSI);
+		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI SMA: " + stochSMA);
+		
+		int direction = parent.dataHandler.rsi_direction.get(cur1 + cur2);
+		if(stochRSI > stochSMA && (direction == 1 || direction == -1)) {
+			
+			if(direction == 1) {
+				parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "_rsi.txt");
+				parent.dataHandler.sellPrices.put(cur1 + cur2, Double.toString(price));
+				double tradeGain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2));
+				tradeGain -= 0.004;
+				
+				parent.dataHandler.rsi_funds.put(cur1 + cur2,  
+						parent.dataHandler.rsi_funds.get(cur1 + cur2) + (1000 * tradeGain) - 1000);
+				
+				parent.logger.logCustom("New funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2), cur1 + cur2 + "_rsi.txt");
+			}
+			else
+				System.out.println("Setting StochRSI trend for " + cur1 + cur2 + " to Down.");
+			
+			parent.dataHandler.rsi_direction.put(cur1 + cur2, 0);
+		}
+		else if(stochRSI < stochSMA && (direction == 0 || direction == -1)) {
+			
+			if(direction == 0) {
+				parent.logger.logCustom("Buy signal at " + price, cur1 + cur2 + "_rsi.txt");
+				parent.dataHandler.buyPrices.put(cur1 + cur2, Double.toString(price));
+			} else
+				System.out.println("Setting StochRSI trend for " + cur1 + cur2 + " to Up.");
+			
+			parent.dataHandler.rsi_direction.put(cur1 + cur2, 1);
+		}
+	}
+	
+	private double getSMA(List<Double> list, int length) {
+		
+		if(length > list.size())
+			length = list.size();
+		
+		List<Double> subList = list.subList(list.size() - length, list.size());
+
+		double total = 0;
+		for(double item: subList)
+			total += item;
+		
+		return total / (double)length;
+	}
+	
+	private double getEdgeRSI(String cur1, String cur2, int high) {
+		double rsi = 0;
+		
+		int size = parent.dataHandler.historyRSIValues.get(cur1 + cur2).size();
+		if(size > Configuration.RSISTOCH1)
+			size = Configuration.RSISTOCH1;
+		
+		List<Double> lastRSI = parent.dataHandler.historyRSIValues.get(cur1 + cur2)
+				.subList(parent.dataHandler.historyRSIValues.get(cur1 + cur2).size() - size,
+						parent.dataHandler.historyRSIValues.get(cur1 + cur2).size() - 1);
+		
+		for(Double r: lastRSI) {
+			if(high == 1 && r > rsi)
+				rsi = r;
+			
+			if(high != 1 && r < rsi)
+				rsi = r;
+		}
+		
+		return rsi;
 	}
 	
 	
@@ -253,23 +344,35 @@ public class MACDAgent {
 		
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Histogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
 		
-		boolean direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
-		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.02 && direction) {
-			parent.dataHandler.macd_direction.put(cur1 + cur2, false);
-			parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "macd.txt");
-			parent.dataHandler.sellPrices.put(cur1 + cur2, Double.toString(price));
-			double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2));
-			gain -= 0.004;
+		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
+		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.02 && (direction == 1 || direction == -1)) {
 			
-			parent.dataHandler.macd_funds.put(cur1 + cur2,  
-					parent.dataHandler.macd_funds.get(cur1 + cur2) + (1000 * gain) - 1000);
-			
-			parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), cur1 + cur2 + "macd.txt");
+			if(direction == 1) {
+				parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "macd.txt");
+				parent.dataHandler.sellPrices.put(cur1 + cur2, Double.toString(price));
+				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2));
+				gain -= 0.004;
+				
+				parent.dataHandler.macd_funds.put(cur1 + cur2,  
+						parent.dataHandler.macd_funds.get(cur1 + cur2) + (1000 * gain) - 1000);
+				
+				parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), cur1 + cur2 + "macd.txt");
+			}
+			else
+				System.out.println("Setting MACD trend for " + cur1 + cur2 + " to Down.");
+
+			parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
 		}
-		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.02 && !direction) {
-			parent.dataHandler.macd_direction.put(cur1 + cur2, true);
-			parent.logger.logCustom("Buy signal at " + price, cur1 + cur2 + "macd.txt");
-			parent.dataHandler.buyPrices.put(cur1 + cur2, Double.toString(price));
+		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.02 &&  (direction == 0 || direction == -1)) {
+			
+			if(direction == 0) {
+				parent.logger.logCustom("Buy signal at " + price, cur1 + cur2 + "macd.txt");
+				parent.dataHandler.buyPrices.put(cur1 + cur2, Double.toString(price));
+			} 
+			else
+				System.out.println("Setting MACD trend for " + cur1 + cur2 + " to Up.");
+			
+			parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
 		}
 	}
 	
