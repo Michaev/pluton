@@ -366,13 +366,8 @@ public class MACDAgent {
 		}
 		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.02 &&  (direction == 0 || direction == -1)) {
 			
-			if(direction == 0) {
-				parent.logger.logCustom("Buy signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
-				parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
-			} 
-			else
-				System.out.println("Setting MACD trend for " + cur1 + cur2 + " to Up.");
-			
+			parent.logger.logCustom("Buy signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
+			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
 		}
 	}
