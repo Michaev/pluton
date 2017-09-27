@@ -18,6 +18,7 @@ import DB.DBHandler;
 import Data.DataHandler;
 import Data.FileLoader;
 import Data.Funds;
+import Mail.Mail;
 import MarketBuildTraining.MarketBuildTraining;
 import MarketBuildTraining.MarketEvaluate;
 import MarketBuildTraining.MarketPredict;
@@ -41,13 +42,22 @@ public class Pluton {
 	public DBHandler dbHandler;
 	public Analyzer analyzer;
 	public Logger logger;
+	public Mail mailService;
 	
 	public List<String> currencies = new ArrayList<String>();
 	
 	public Pluton() {
 		
 		logger = new Logger(Configuration.DEBUG_LOG_FILEPATH, Configuration.TRADE_LOG_FILEPATH);
+		mailService = new Mail();
 
+		if(Configuration.MODE.equals("test_mail")) {
+			Mail mailService = new Mail();
+			mailService.sendMail("BTCUSD", "Testing testing  ~ ");
+			
+			System.exit(0);
+		}
+		
 		for(String currency: Configuration.CURRENCIES) {
 			currencies.add(currency);
 		}

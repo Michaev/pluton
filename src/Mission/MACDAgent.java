@@ -252,6 +252,10 @@ public class MACDAgent {
 						parent.dataHandler.rsi_funds.get(cur1 + cur2) + (1000 * tradeGain) - 1000);
 				
 				parent.logger.logCustom("New funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2), cur1 + cur2 + "_rsi.txt");
+				
+				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2) + "\nSold at " + price + 
+						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
+				parent.mailService.sendMail("Trade report: " + cur1 + cur2, mailMessage);
 			}
 			else
 				System.out.println("Setting StochRSI trend for " + cur1 + cur2 + " to Down.");
@@ -357,6 +361,10 @@ public class MACDAgent {
 						parent.dataHandler.macd_funds.get(cur1 + cur2) + (1000 * gain) - 1000);
 				
 				parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), cur1 + cur2 + "macd.txt");
+				
+				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2) + "\nSold at " + price + 
+						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
+				parent.mailService.sendMail("Trade report: " + cur1 + cur2, mailMessage);
 			}
 			else
 				System.out.println("Setting MACD trend for " + cur1 + cur2 + " to Down.");

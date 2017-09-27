@@ -10,8 +10,10 @@ public class Configuration {
 	//public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
 	//public static String MODE = "simulation";					// Stage 3a - Simulate strategy
-	public static String MODE = "simulation_MACD";				// Stage 3b - Simulate MACD strategy
-	//public static String MODE = "pluton";				// Stage 4 - let's roll
+	public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
+	//public static String MODE = "pluton";						// Stage 4 - let's roll
+
+	//public static String MODE = "test_mail";					// Test mail
 
 	//public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.25); // Fifteen second intervals
 	public static long INTERVAL_TICK_GEN = (long) (1000 * 60 * 0.5); // Thirty second intervals
@@ -19,6 +21,10 @@ public class Configuration {
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 5; // Five minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 15; // Fifteen minute intervals
 	//public static long INTERVAL_TICK_GEN = 1000 * 60 * 1440; // Day minute intervals
+
+	public static String toMail = "semtex789@gmail.com";
+	public static String fromMail = "pluton726@gmail.com";
+	public static String mail = "!1Pluton67";
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
 	public static int NUMBER_OF_DAYS_BACKLOAD = 30;
