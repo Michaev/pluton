@@ -360,7 +360,7 @@ public class MACDAgent {
 				parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), cur1 + cur2 + "macd.txt");
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2) + "\nSold at " + price + 
-						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
+						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2);
 				parent.mailService.sendMail("Trade report: MACD / " + cur1 + cur2, mailMessage);
 			}
 			else
