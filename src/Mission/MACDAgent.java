@@ -240,7 +240,7 @@ public class MACDAgent {
 		if(stochRSI > stochSMA && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
-				parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "_rsi.txt");
+				parent.logger.logCustom("Sell signal at " + price,  "rsi\\" + cur1 + cur2 + "rsi.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "RSI", Double.toString(price));
 				double tradeGain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI"));
 				tradeGain -= 0.004;
@@ -248,7 +248,7 @@ public class MACDAgent {
 				parent.dataHandler.rsi_funds.put(cur1 + cur2,  
 						parent.dataHandler.rsi_funds.get(cur1 + cur2) + (1000 * tradeGain) - 1000);
 				
-				parent.logger.logCustom("New funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2), cur1 + cur2 + "_rsi.txt");
+				parent.logger.logCustom("New funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2), "rsi\\" + cur1 + cur2 + "rsi.txt");
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI") + "\nSold at " + price + 
 						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
@@ -262,7 +262,7 @@ public class MACDAgent {
 		else if(stochRSI < stochSMA && (direction == 0 || direction == -1)) {
 			
 			if(direction == 0) {
-				parent.logger.logCustom("Buy signal at " + price, cur1 + cur2 + "_rsi.txt");
+				parent.logger.logCustom("Buy signal at " + price,  "rsi\\" + cur1 + cur2 + "rsi.txt");
 				parent.dataHandler.buyPrices.put(cur1 + cur2 + "RSI", Double.toString(price));
 			} else
 				System.out.println("Setting StochRSI trend for " + cur1 + cur2 + " to Up.");
@@ -349,7 +349,7 @@ public class MACDAgent {
 		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.02 && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
-				parent.logger.logCustom("Sell signal at " + price, cur1 + cur2 + "macd.txt");
+				parent.logger.logCustom("Sell signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD"));
 				gain -= 0.004;
@@ -357,7 +357,7 @@ public class MACDAgent {
 				parent.dataHandler.macd_funds.put(cur1 + cur2,  
 						parent.dataHandler.macd_funds.get(cur1 + cur2) + (1000 * gain) - 1000);
 				
-				parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), cur1 + cur2 + "macd.txt");
+				parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), "macd\\" + cur1 + cur2 + "macd.txt");
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD") + "\nSold at " + price + 
 						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2);
@@ -371,7 +371,7 @@ public class MACDAgent {
 		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.02 &&  (direction == 0 || direction == -1)) {
 			
 			if(direction == 0) {
-				parent.logger.logCustom("Buy signal at " + price, cur1 + cur2 + "macd.txt");
+				parent.logger.logCustom("Buy signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
 				parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 			} 
 			else
