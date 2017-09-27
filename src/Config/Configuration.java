@@ -41,7 +41,7 @@ public class Configuration {
 	public static int MACD_EMA_1 = 12;
 	public static int MACD_EMA_2 = 26;
 	public static int MACD_SIGNAL_LINE = 9;
-	public static int MACD_TIME_PERIOD = 1 * 60000; // 15 minute periods
+	public static int MACD_TIME_PERIOD = 15 * 60000; // 15 minute periods
 	
 	public static int RSI1 = 14;
 	public static int RSISTOCH1 = 14;
@@ -102,7 +102,7 @@ public class Configuration {
 	
 	// 3. Training.
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/IOT/USD", "BTF/LTC/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
@@ -121,13 +121,18 @@ public class Configuration {
 
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
-//	public static List<String> CURRENCIES = Arrays.asList(
-//			"BTF/XMR/USD",
-//			"BTF/OMG/USD",
-//			"BTF/IOT/USD",
-//			"BTF/SAN/USD",
-//			"BTF/DSH/USD", 
-//			"BTF/BCH/USD");
+	public static List<String> CURRENCIES = Arrays.asList(
+			"BTF/XMR/USD",
+			"BTF/OMG/USD",
+			"BTF/IOT/USD",
+			"BTF/SAN/USD",
+			"BTF/DSH/USD", 
+			"BTF/BCH/USD", 
+			"BTF/BTC/USD", 
+			"BTF/LTC/USD", 
+			"BTF/ETH/USD", 
+			"BTF/NEO/USD", 
+			"BTF/ETC/USD");
 	
 	// 4. Finished training.
 

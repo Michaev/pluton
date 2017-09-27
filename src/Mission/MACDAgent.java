@@ -1,7 +1,5 @@
 package Mission;
 
-import static Config.Configuration.MACD_EMA_2;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -13,7 +11,6 @@ import org.json.JSONObject;
 
 import Config.Configuration;
 import Engine.Pluton;
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 public class MACDAgent {
 	
@@ -255,7 +252,7 @@ public class MACDAgent {
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2) + "\nSold at " + price + 
 						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
-				parent.mailService.sendMail("Trade report: " + cur1 + cur2, mailMessage);
+				parent.mailService.sendMail("Trade report: RSI / " + cur1 + cur2, mailMessage);
 			}
 			else
 				System.out.println("Setting StochRSI trend for " + cur1 + cur2 + " to Down.");
@@ -364,7 +361,7 @@ public class MACDAgent {
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2) + "\nSold at " + price + 
 						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
-				parent.mailService.sendMail("Trade report: " + cur1 + cur2, mailMessage);
+				parent.mailService.sendMail("Trade report: MACD / " + cur1 + cur2, mailMessage);
 			}
 			else
 				System.out.println("Setting MACD trend for " + cur1 + cur2 + " to Down.");
