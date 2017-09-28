@@ -132,6 +132,8 @@ public class Configuration {
 			"BTF/LTC/USD", 
 			"BTF/ETH/USD", 
 			"BTF/NEO/USD", 
+			"BTF/EOS/USD", 
+			"BTF/ZEC/USD", 
 			"BTF/ETC/USD");
 	
 	// 4. Finished training.

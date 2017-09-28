@@ -342,7 +342,7 @@ public class MACDAgent {
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Histogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
 		
 		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
-		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.02 && (direction == 1 || direction == -1)) {
+		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.015 && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
 				parent.logger.logCustom("Sell signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
@@ -364,7 +364,7 @@ public class MACDAgent {
 
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
 		}
-		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.02 &&  (direction == 0 || direction == -1)) {
+		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.015 &&  (direction == 0 || direction == -1)) {
 			
 			parent.logger.logCustom("Buy signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
