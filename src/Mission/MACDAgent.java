@@ -115,7 +115,7 @@ public class MACDAgent {
 			
 			seq++;
 			
-			long sleepTime = Configuration.MACD_TIME_PERIOD - ((new Date().getTime() - d.getTime()) / 5);
+			long sleepTime = (Configuration.MACD_TIME_PERIOD / 5 ) - (new Date().getTime() - d.getTime());
 			try {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
