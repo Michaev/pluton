@@ -248,7 +248,7 @@ public class MACDAgent {
 		if(stochRSI > stochSMA && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
-				parent.logger.logCustom("Sell signal at " + price + "newTick: " + newTick,  "rsi\\" + cur1 + cur2 + "rsi.txt");
+				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick,  "rsi\\" + cur1 + cur2 + "rsi.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "RSI", Double.toString(price));
 				double tradeGain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI"));
 				tradeGain -= 0.004;
@@ -361,7 +361,7 @@ public class MACDAgent {
 		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < 0 && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
-				parent.logger.logCustom("Sell signal at " + price + "newTick: " + newTick, "macd\\" + cur1 + cur2 + "macd.txt");
+				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick, "macd\\" + cur1 + cur2 + "macd.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD"));
 				gain -= 0.004;
