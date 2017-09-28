@@ -46,6 +46,8 @@ public class DataHandler {
 	
 	public List<Datapoint> datapoints;
 	
+	public double totalResults;
+	
 	private boolean verbose;
 	
 	public DataHandler(boolean verbose, Pluton parent) {
@@ -74,6 +76,7 @@ public class DataHandler {
 		this.macd_funds = new HashMap<String, Double>();
 		this.rsi_direction = new HashMap<String, Integer>();
 		this.rsi_funds = new HashMap<String, Double>();
+		this.totalResults = 0;
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);

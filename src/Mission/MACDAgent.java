@@ -100,17 +100,15 @@ public class MACDAgent {
 				long timestamp = d.getTime();
 				double price = parent.restHandler_btf.getLastPrice(cur1, cur2, timestamp);
 				
-				
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).add(price);
 				
+				calculateEMAs(cur1, cur2, newTick);
+				calculateRSI(cur1, cur2, newTick);
+
 				if(newTick)
 					parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(0);
 				else
 					parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(parent.dataHandler.historyMACD_prices.get(cur1 + cur2).size() - 1);
-				
-				calculateEMAs(cur1, cur2, newTick);
-				calculateRSI(cur1, cur2, newTick);
-				
 			}			
 			
 			seq++;
@@ -257,11 +255,15 @@ public class MACDAgent {
 				
 				parent.dataHandler.rsi_funds.put(cur1 + cur2,  
 						parent.dataHandler.rsi_funds.get(cur1 + cur2) + (1000 * tradeGain) - 1000);
+
+				parent.dataHandler.totalResults += (1000 * gain) - 1000;
 				
 				parent.logger.logCustom("New funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2), "rsi\\" + cur1 + cur2 + "rsi.txt");
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI") + "\nSold at " + price + 
-						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
+						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2) + 
+						 "\n\nNew total funds: " + parent.dataHandler.totalResults +
+						 "\nnewTick: " + newTick;
 				parent.mailService.sendMail("Trade report: RSI / " + cur1 + cur2, mailMessage);
 			}
 			else
@@ -356,7 +358,7 @@ public class MACDAgent {
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Histogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
 		
 		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
-		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.015 && (direction == 1 || direction == -1)) {
+		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < 0 && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
 				parent.logger.logCustom("Sell signal at " + price + "newTick: " + newTick, "macd\\" + cur1 + cur2 + "macd.txt");
@@ -367,10 +369,14 @@ public class MACDAgent {
 				parent.dataHandler.macd_funds.put(cur1 + cur2,  
 						parent.dataHandler.macd_funds.get(cur1 + cur2) + (1000 * gain) - 1000);
 				
+				parent.dataHandler.totalResults += (1000 * gain) - 1000;
+				
 				parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), "macd\\" + cur1 + cur2 + "macd.txt");
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD") + "\nSold at " + price + 
-						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2);
+						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2) + 
+						 "\n\nNew total funds: " + parent.dataHandler.totalResults +
+						 "\nnewTick: " + newTick;
 				parent.mailService.sendMail("Trade report: MACD / " + cur1 + cur2, mailMessage);
 			}
 			else
@@ -378,7 +384,7 @@ public class MACDAgent {
 
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
 		}
-		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.015 &&  (direction == 0 || direction == -1)) {
+		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0 &&  (direction == 0 || direction == -1)) {
 			
 			parent.logger.logCustom("Buy signal at " + price + "newTick: " + newTick, "macd\\" + cur1 + cur2 + "macd.txt");
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
