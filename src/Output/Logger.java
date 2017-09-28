@@ -58,7 +58,13 @@ public class Logger {
 		try {
 			BufferedWriter customLog;
 			String wd = System.getProperty("user.dir");
-			FileWriter customFileWriter = new FileWriter(wd + "\\" + filepath, true);
+			
+			String finalPath = wd + "\\" + filepath;
+			
+			if (!System.getProperty("os.name").startsWith("Windows"))
+				finalPath = finalPath.replace("\\", "/");
+			
+			FileWriter customFileWriter = new FileWriter(finalPath, true);
 			customLog = new BufferedWriter(customFileWriter);
 			Date d = new Date();
 			

@@ -100,7 +100,7 @@ public class MACDAgent {
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).add(price);
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(0);
 				
-				//calculateEMAs(cur1, cur2);
+				calculateEMAs(cur1, cur2);
 				calculateRSI(cur1, cur2);
 				
 			}			
