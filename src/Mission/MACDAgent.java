@@ -2,6 +2,7 @@ package Mission;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -34,7 +35,7 @@ public class MACDAgent {
 			
 			Calendar cal = Calendar.getInstance();
 			//cal.add(Calendar.DATE, -15);
-			cal.add(Calendar.MILLISECOND, - Configuration.MACD_TIME_PERIOD * (Configuration.MACD_EMA_2 * 2));
+
 			parent.dataHandler.historyMACD_prices.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.historyMACD_EMA1.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.historyMACD_EMA2.put(cur1 + cur2, new ArrayList<Double>());
@@ -42,11 +43,19 @@ public class MACDAgent {
 			parent.dataHandler.historyMACD_signal.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.macd_direction.put(cur1 + cur2, -1);
 			parent.dataHandler.macd_funds.put(cur1 + cur2, (double)1000);
+			parent.dataHandler.max_macd_histogram.put(cur1 + cur2, new ArrayList<Double>());
 			
+			if(Configuration.TEST) {
+				cal.add(Calendar.DATE, - Configuration.NUMBER_OF_DAYS_BACKLOAD);
+				startTime = cal.getTimeInMillis();
+			} else
+				cal.add(Calendar.MILLISECOND, - Configuration.MACD_TIME_PERIOD * (Configuration.MACD_EMA_2 * 2));
 			
 			List<Double> closingPrices = new ArrayList<Double>();
 			// Get enough data for the MACD, according to the MACD strategy
 			startTime = cal.getTimeInMillis();
+			
+			int seq = 0;
 			long interval = startTime;
 			JSONArray jArray = new JSONArray();	
 			
@@ -57,9 +66,11 @@ public class MACDAgent {
 					
 					JSONArray jObj = (JSONArray) obj;
 					startTime = jObj.getLong(1);
+					parent.dataHandler.macd_current_timestamp.put(cur1 + cur2, startTime);
 					if(startTime > interval) {
 						interval += Configuration.MACD_TIME_PERIOD;
 						closingPrices.add(jObj.getDouble(3));
+						seq++;
 					}
 				}
 				
@@ -69,7 +80,7 @@ public class MACDAgent {
 					e.printStackTrace();
 				}
 				
-			} while (jArray.length() % 1000 == 0);
+			} while ((!Configuration.TEST && jArray.length() % 1000 == 0) || (Configuration.TEST && seq < 50));
 			
 			for(double close: closingPrices) {
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).add(close);
@@ -82,7 +93,7 @@ public class MACDAgent {
 			}
 			
 			initializeEMAs(cur1, cur2);
-			initializeRSI(cur1, cur2);
+			//initializeRSI(cur1, cur2);
 			
 			System.out.println(cur1 + "/" + cur2 + " list initiated as: " + parent.dataHandler.historyMACD_prices.get(cur1 + cur2));
 		}
@@ -95,17 +106,31 @@ public class MACDAgent {
 				String cur2 = currency.split("/")[2];
 				
 				long timestamp = d.getTime();
+				
+				if(Configuration.TEST) {
+					timestamp = parent.dataHandler.macd_current_timestamp.get(cur1 + cur2);
+				}
+				
 				double price = parent.restHandler_btf.getLastPrice(cur1, cur2, timestamp);
 				
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).add(price);
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(0);
 				
 				calculateEMAs(cur1, cur2);
-				calculateRSI(cur1, cur2);
+				//calculateRSI(cur1, cur2);
+				
+				if(Configuration.TEST) {
+					parent.dataHandler.macd_current_timestamp.put(cur1 + cur2,
+							parent.dataHandler.macd_current_timestamp.get(cur1 + cur2) + Configuration.MACD_TIME_PERIOD);
+				}
 				
 			}			
 			
 			long sleepTime = Configuration.MACD_TIME_PERIOD - (new Date().getTime() - d.getTime());
+			
+			if(Configuration.TEST)
+				sleepTime = 60000 / Configuration.NUMBER_OF_API_CALLS_MINUTE;
+			
 			try {
 				Thread.sleep(sleepTime);
 			} catch (InterruptedException e) {
@@ -311,6 +336,8 @@ public class MACDAgent {
 		List<Double> EMA2 = parent.dataHandler.historyMACD_EMA2.get(cur1 + cur2);
 		List<Double> MACD = parent.dataHandler.historyMACD_macd.get(cur1 + cur2);
 		List<Double> signal = parent.dataHandler.historyMACD_signal.get(cur1 + cur2);
+		List<Double> limits = parent.dataHandler.max_macd_histogram.get(cur1 + cur2);
+		
 		double price = prices.get(prices.size()-1);
 		
 		double multiplier = (2 / (double)(Configuration.MACD_EMA_1 + 1));
@@ -341,8 +368,14 @@ public class MACDAgent {
 		
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Histogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
 		
+		limits.add(MACD.get(MACD.size()-1) - signal.get(signal.size()-1));
+		if(limits.size() > Configuration.MACD_LIMIT_SCOPE)
+			limits.remove(0);
+		
+		double limit = (double) Collections.max(limits) / (double) Configuration.MACD_LIMIT;
+		
 		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
-		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < -0.015 && (direction == 1 || direction == -1)) {
+		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < - limit && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
 				parent.logger.logCustom("Sell signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
@@ -364,7 +397,7 @@ public class MACDAgent {
 
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
 		}
-		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0.015 &&  (direction == 0 || direction == -1)) {
+		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > limit &&  (direction == 0 || direction == -1)) {
 			
 			parent.logger.logCustom("Buy signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
@@ -379,6 +412,8 @@ public class MACDAgent {
 		List<Double> EMA2 = parent.dataHandler.historyMACD_EMA2.get(cur1 + cur2);
 		List<Double> MACD = parent.dataHandler.historyMACD_macd.get(cur1 + cur2);
 		List<Double> signal = parent.dataHandler.historyMACD_signal.get(cur1 + cur2);
+		List<Double> limits = parent.dataHandler.max_macd_histogram.get(cur1 + cur2);
+		
 		double currentEma1 = -1;
 		double currentEma2 = -1;
 		
@@ -454,6 +489,10 @@ public class MACDAgent {
 			double currentSignal = (MACD.get(i) * multiplier) + (prevSignal * (1 - multiplier));
 			signal.add(currentSignal);
 		}
+		
+		limits.add(Math.abs(MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
+		if(limits.size() > Configuration.MACD_LIMIT_SCOPE)
+			limits.remove(0);
 		
 		System.out.println("EMA1: " + EMA1);
 		System.out.println("EMA2: " + EMA2);

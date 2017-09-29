@@ -44,8 +44,13 @@ public class DataHandler {
 	public Map<String, Integer> rsi_direction;
 	public Map<String, Double> rsi_funds;
 	
-	public List<Datapoint> datapoints;
+	public Map<String, List<Double>> max_macd_histogram;
+	public Map<String, Long> macd_current_timestamp;
 	
+	public List<Datapoint> datapoints;
+
+	public double totalResults;
+
 	private boolean verbose;
 	
 	public DataHandler(boolean verbose, Pluton parent) {
@@ -74,6 +79,10 @@ public class DataHandler {
 		this.macd_funds = new HashMap<String, Double>();
 		this.rsi_direction = new HashMap<String, Integer>();
 		this.rsi_funds = new HashMap<String, Double>();
+		this.totalResults = 0;
+
+		this.max_macd_histogram = new HashMap<String, List<Double>>();
+		this.macd_current_timestamp = new HashMap<String, Long>();
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);
