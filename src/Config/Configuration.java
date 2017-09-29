@@ -27,7 +27,7 @@ public class Configuration {
 	public static String mail = "!1Pluton67";
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
-	public static int NUMBER_OF_DAYS_BACKLOAD = 3;
+	public static int NUMBER_OF_DAYS_BACKLOAD = 5;
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
@@ -113,7 +113,7 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
@@ -126,21 +126,21 @@ public class Configuration {
 
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
-//	public static List<String> CURRENCIES = Arrays.asList(
+	public static List<String> CURRENCIES = Arrays.asList(
 //			"BTF/XMR/USD",
-//			"BTF/OMG/USD",
-//			"BTF/IOT/USD",
+			"BTF/OMG/USD",
+			"BTF/IOT/USD",
 //			"BTF/SAN/USD",
 //			"BTF/DSH/USD", 
 //			"BTF/BCH/USD", 
 //			"BTF/BTC/USD", 
-//			"BTF/LTC/USD", 
-//			"BTF/ETH/USD", 
-//			"BTF/NEO/USD", 
+			"BTF/LTC/USD", 
+			"BTF/NEO/USD", 
 //			"BTF/EOS/USD", 
-//			"BTF/ZEC/USD", 
-//			"BTF/ETP/USD", 
-//			"BTF/ETC/USD");
+			"BTF/ZEC/USD", 
+			"BTF/ETP/USD", 
+//			"BTF/ETC/USD", 
+			"BTF/ETH/USD");
 
 	
 	// 4. Finished training.
