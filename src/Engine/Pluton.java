@@ -50,7 +50,7 @@ public class Pluton {
 		
 		logger = new Logger(Configuration.DEBUG_LOG_FILEPATH, Configuration.TRADE_LOG_FILEPATH);
 		mailService = new Mail();
-
+		
 		if(Configuration.MODE.equals("test_mail")) {
 			Mail mailService = new Mail();
 			mailService.sendMail("BTCUSD", "Testing testing  ~ ");

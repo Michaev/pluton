@@ -48,7 +48,6 @@ public class DataHandler {
 	public Map<String, Long> macd_current_timestamp;
 	
 	public List<Datapoint> datapoints;
-
 	public double totalResults;
 
 	private boolean verbose;

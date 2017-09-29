@@ -141,6 +141,7 @@ public class Configuration {
 //			"BTF/ZEC/USD", 
 //			"BTF/ETP/USD", 
 //			"BTF/ETC/USD");
+
 	
 	// 4. Finished training.
 

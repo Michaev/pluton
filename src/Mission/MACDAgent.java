@@ -19,6 +19,7 @@ public class MACDAgent {
 	long startTime;
 	boolean keepRunning;
 	Date d;
+	int seq = 0;
 	
 	public MACDAgent(Pluton parent) {
 		this.parent = parent;
@@ -55,7 +56,7 @@ public class MACDAgent {
 			// Get enough data for the MACD, according to the MACD strategy
 			startTime = cal.getTimeInMillis();
 			
-			int seq = 0;
+			int seqInit = 0;
 			long interval = startTime;
 			JSONArray jArray = new JSONArray();	
 			
@@ -70,7 +71,7 @@ public class MACDAgent {
 					if(startTime > interval) {
 						interval += Configuration.MACD_TIME_PERIOD;
 						closingPrices.add(jObj.getDouble(3));
-						seq++;
+						seqInit++;
 					}
 				}
 				
@@ -80,7 +81,7 @@ public class MACDAgent {
 					e.printStackTrace();
 				}
 				
-			} while ((!Configuration.TEST && jArray.length() % 1000 == 0) || (Configuration.TEST && seq < 50));
+			} while ((!Configuration.TEST && jArray.length() % 1000 == 0) || (Configuration.TEST && seqInit < 50));
 			
 			for(double close: closingPrices) {
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).add(close);
@@ -100,6 +101,8 @@ public class MACDAgent {
 		
 		while(keepRunning) {
 			d = new Date();
+
+			boolean newTick = seq % 5 == 0;
 			
 			for(String currency: Configuration.CURRENCIES) {
 				String cur1 = currency.split("/")[1];
@@ -114,22 +117,27 @@ public class MACDAgent {
 				double price = parent.restHandler_btf.getLastPrice(cur1, cur2, timestamp);
 				
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).add(price);
-				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(0);
-				
-				calculateEMAs(cur1, cur2);
-				//calculateRSI(cur1, cur2);
+
+				calculateEMAs(cur1, cur2, newTick);
+				//calculateRSI(cur1, cur2, newTick);
 				
 				if(Configuration.TEST) {
 					parent.dataHandler.macd_current_timestamp.put(cur1 + cur2,
-							parent.dataHandler.macd_current_timestamp.get(cur1 + cur2) + Configuration.MACD_TIME_PERIOD);
+							parent.dataHandler.macd_current_timestamp.get(cur1 + cur2) + (Configuration.MACD_TIME_PERIOD / 5));
 				}
-				
+
+				if(newTick)
+					parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(0);
+				else
+					parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(parent.dataHandler.historyMACD_prices.get(cur1 + cur2).size() - 1);
 			}			
 			
-			long sleepTime = Configuration.MACD_TIME_PERIOD - (new Date().getTime() - d.getTime());
+			long sleepTime = (Configuration.MACD_TIME_PERIOD / 5 ) - (new Date().getTime() - d.getTime());
 			
 			if(Configuration.TEST)
 				sleepTime = 60000 / Configuration.NUMBER_OF_API_CALLS_MINUTE;
+			
+			seq++;
 			
 			try {
 				Thread.sleep(sleepTime);
@@ -219,7 +227,7 @@ public class MACDAgent {
 		}
 	}
 	
-	private void calculateRSI(String cur1, String cur2) {
+	private void calculateRSI(String cur1, String cur2, boolean newTick) {
 		List<Double> prices = parent.dataHandler.historyMACD_prices.get(cur1 + cur2);
 		List<Double> rsiGains = parent.dataHandler.historyRSIGain.get(cur1 + cur2);
 		List<Double> rsiLosses = parent.dataHandler.historyRSILoss.get(cur1 + cur2);
@@ -265,18 +273,22 @@ public class MACDAgent {
 		if(stochRSI > stochSMA && (direction == 1 || direction == -1)) {
 			
 			if(direction == 1) {
-				parent.logger.logCustom("Sell signal at " + price,  "rsi\\" + cur1 + cur2 + "rsi.txt");
+				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick,  "rsi\\" + cur1 + cur2 + "rsi.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "RSI", Double.toString(price));
 				double tradeGain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI"));
 				tradeGain -= 0.004;
 				
 				parent.dataHandler.rsi_funds.put(cur1 + cur2,  
 						parent.dataHandler.rsi_funds.get(cur1 + cur2) + (1000 * tradeGain) - 1000);
+
+				parent.dataHandler.totalResults += (1000 * gain) - 1000;
 				
 				parent.logger.logCustom("New funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2), "rsi\\" + cur1 + cur2 + "rsi.txt");
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI") + "\nSold at " + price + 
-						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2);
+						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2) + 
+						 "\n\nNew total funds: " + parent.dataHandler.totalResults +
+						 "\nnewTick: " + newTick;
 				parent.mailService.sendMail("Trade report: RSI / " + cur1 + cur2, mailMessage);
 			}
 			else
@@ -286,9 +298,17 @@ public class MACDAgent {
 		}
 		else if(stochRSI < stochSMA && (direction == 0 || direction == -1)) {
 			
-			parent.logger.logCustom("Buy signal at " + price,  "rsi\\" + cur1 + cur2 + "rsi.txt");
+			parent.logger.logCustom("Buy signal at " + price + "newTick: " + newTick,  "rsi\\" + cur1 + cur2 + "rsi.txt");
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "RSI", Double.toString(price));
 			parent.dataHandler.rsi_direction.put(cur1 + cur2, 1);
+		}
+		
+		if(!newTick) {
+			rsiGains.remove(rsiGains.size() -1 );
+			rsiLosses.remove(rsiLosses.size() - 1);
+			rsValues.remove(rsValues.size() - 1);
+			rsiValues.remove(rsiValues.size() - 1);
+			stochRsiValues.remove(stochRsiValues.size() - 1);
 		}
 	}
 	
@@ -329,7 +349,7 @@ public class MACDAgent {
 	}
 	
 	
-	private void calculateEMAs(String cur1, String cur2) {
+	private void calculateEMAs(String cur1, String cur2, boolean newTick) {
 
 		List<Double> prices = parent.dataHandler.historyMACD_prices.get(cur1 + cur2);
 		List<Double> EMA1 = parent.dataHandler.historyMACD_EMA1.get(cur1 + cur2);
@@ -344,22 +364,18 @@ public class MACDAgent {
 		double prevEma1 = EMA1.get(EMA1.size()-1);
 		double currentEma1 = (price * multiplier) + (prevEma1 * (1 - multiplier));
 		EMA1.add(currentEma1);
-		EMA1.remove(0);
 		
 		multiplier = (2 / (double)(Configuration.MACD_EMA_2 + 1));
 		double prevEma2 = EMA2.get(EMA2.size()-1);
 		double currentEma2 = (price * multiplier) + (prevEma2 * (1 - multiplier));
 		EMA2.add(currentEma2);
-		EMA2.remove(0);
 		
 		MACD.add(currentEma1 - currentEma2);
-		MACD.remove(0);
 
 		multiplier = (2 / (double)(Configuration.MACD_SIGNAL_LINE + 1));
 		double prevSignal = signal.get(signal.size()-1);
 		double currentSignal = (MACD.get(MACD.size()-1) * multiplier) + (prevSignal * (1 - multiplier));
 		signal.add(currentSignal);
-		signal.remove(0);
 		
 		System.out.println("EMA1: " + EMA1);
 		System.out.println("EMA2: " + EMA2);
@@ -375,10 +391,10 @@ public class MACDAgent {
 		double limit = (double) Collections.max(limits) / (double) Configuration.MACD_LIMIT;
 		
 		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
+		
 		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < - limit && (direction == 1 || direction == -1)) {
-			
 			if(direction == 1) {
-				parent.logger.logCustom("Sell signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
+				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick, "macd\\" + cur1 + cur2 + "macd.txt");
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD"));
 				gain -= 0.004;
@@ -386,10 +402,14 @@ public class MACDAgent {
 				parent.dataHandler.macd_funds.put(cur1 + cur2,  
 						parent.dataHandler.macd_funds.get(cur1 + cur2) + (1000 * gain) - 1000);
 				
+				parent.dataHandler.totalResults += (1000 * gain) - 1000;
+				
 				parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2), "macd\\" + cur1 + cur2 + "macd.txt");
 				
 				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD") + "\nSold at " + price + 
-						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2);
+						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2) + 
+						 "\n\nNew total funds: " + parent.dataHandler.totalResults +
+						 "\nnewTick: " + newTick;
 				parent.mailService.sendMail("Trade report: MACD / " + cur1 + cur2, mailMessage);
 			}
 			else
@@ -399,9 +419,21 @@ public class MACDAgent {
 		}
 		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > limit &&  (direction == 0 || direction == -1)) {
 			
-			parent.logger.logCustom("Buy signal at " + price, "macd\\" + cur1 + cur2 + "macd.txt");
+			parent.logger.logCustom("Buy signal at " + price + "\nnewTick: " + newTick, "macd\\" + cur1 + cur2 + "macd.txt");
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
+		}
+		
+		if(!newTick) {
+			EMA1.remove(EMA1.size() - 1);
+			EMA2.remove(EMA2.size() - 1);
+			MACD.remove(MACD.size() - 1);
+			signal.remove(signal.size() - 1);
+		} else {
+			EMA1.remove(0);
+			EMA2.remove(0);
+			MACD.remove(0);
+			signal.remove(0);
 		}
 	}
 	
