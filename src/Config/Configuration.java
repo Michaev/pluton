@@ -27,10 +27,11 @@ public class Configuration {
 	public static String mail = "!1Pluton67";
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
-	public static int NUMBER_OF_DAYS_BACKLOAD = 30;
+	public static int NUMBER_OF_DAYS_BACKLOAD = 3;
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
+	public static boolean TEST = true;
 	
 	public static double JUMP_LIMIT = 1.003;
 	public static double JUMP_LIMIT_VOL = 5;
@@ -42,6 +43,8 @@ public class Configuration {
 	public static int MACD_EMA_2 = 26;
 	public static int MACD_SIGNAL_LINE = 9;
 	public static int MACD_TIME_PERIOD = 15 * 60000; // 15 minute periods
+	public static int MACD_LIMIT = 8;
+	public static int MACD_LIMIT_SCOPE = 50;
 	
 	public static int RSI1 = 14;
 	public static int RSISTOCH1 = 14;
@@ -105,10 +108,12 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/NEO/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
@@ -121,20 +126,21 @@ public class Configuration {
 
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
-	public static List<String> CURRENCIES = Arrays.asList(
-			"BTF/XMR/USD",
-			"BTF/OMG/USD",
-			"BTF/IOT/USD",
-			"BTF/SAN/USD",
-			"BTF/DSH/USD", 
-			"BTF/BCH/USD", 
-			"BTF/BTC/USD", 
-			"BTF/LTC/USD", 
-			"BTF/ETH/USD", 
-			"BTF/NEO/USD", 
-			"BTF/EOS/USD", 
-			"BTF/ZEC/USD", 
-			"BTF/ETC/USD");
+//	public static List<String> CURRENCIES = Arrays.asList(
+//			"BTF/XMR/USD",
+//			"BTF/OMG/USD",
+//			"BTF/IOT/USD",
+//			"BTF/SAN/USD",
+//			"BTF/DSH/USD", 
+//			"BTF/BCH/USD", 
+//			"BTF/BTC/USD", 
+//			"BTF/LTC/USD", 
+//			"BTF/ETH/USD", 
+//			"BTF/NEO/USD", 
+//			"BTF/EOS/USD", 
+//			"BTF/ZEC/USD", 
+//			"BTF/ETP/USD", 
+//			"BTF/ETC/USD");
 	
 	// 4. Finished training.
 
