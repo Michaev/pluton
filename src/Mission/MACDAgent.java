@@ -31,6 +31,7 @@ public class MACDAgent {
 		
 		// Initialize
 		for(String currency: Configuration.CURRENCIES) {
+			
 			String cur1 = currency.split("/")[1];
 			String cur2 = currency.split("/")[2];
 			
@@ -60,18 +61,43 @@ public class MACDAgent {
 			long interval = startTime;
 			JSONArray jArray = new JSONArray();	
 			
+			int arraySize = -1;
+			
+			if(Configuration.TEST)
+				arraySize = 50000;
+			else
+				arraySize = 1000;
+			
 			do {
-				jArray = parent.restHandler_btf.getPriceIntervals(cur1, cur2, startTime);
-
+				
+				if(!Configuration.TEST)
+					jArray = parent.restHandler_btf.getPriceIntervals(cur1, cur2, startTime);
+				else
+					jArray = parent.dbHandler.getPriceIntervals(cur1, cur2, startTime, arraySize);
+					
 				for(Object obj: jArray) {
 					
-					JSONArray jObj = (JSONArray) obj;
-					startTime = jObj.getLong(1);
+					double currentPrice = -1;
+					
+					if(!Configuration.TEST) {
+						JSONArray jObj = (JSONArray) obj;
+						startTime = jObj.getLong(1);
+						currentPrice = jObj.getDouble(3);
+					}
+					else {
+						JSONObject jObj = (JSONObject) obj;
+						startTime = (Long) jObj.get("timestamp");
+						currentPrice =  (Double) jObj.get("price");
+					}
+						
 					parent.dataHandler.macd_current_timestamp.put(cur1 + cur2, startTime);
 					if(startTime > interval) {
 						interval += Configuration.MACD_TIME_PERIOD;
-						closingPrices.add(jObj.getDouble(3));
+						closingPrices.add(currentPrice);
 						seqInit++;
+						
+						if(seqInit > 50)
+							break;
 					}
 				}
 				
@@ -116,7 +142,11 @@ public class MACDAgent {
 					timestamp = parent.dataHandler.macd_current_timestamp.get(cur1 + cur2);
 				}
 				
-				double price = parent.restHandler_btf.getLastPrice(cur1, cur2, timestamp);
+				double price = -1;
+				if(!Configuration.TEST)
+					price = parent.restHandler_btf.getLastPrice(cur1, cur2, timestamp);
+				else
+					price = parent.dbHandler.getLastPrice(cur1, cur2, timestamp);
 				
 				parent.dataHandler.historyMACD_prices.get(cur1 + cur2).add(price);
 
@@ -141,7 +171,7 @@ public class MACDAgent {
 			long sleepTime = (Configuration.MACD_TIME_PERIOD / 5 ) - (new Date().getTime() - d.getTime());
 			
 			if(Configuration.TEST)
-				sleepTime = 60000 * Configuration.CURRENCIES.size() / Configuration.NUMBER_OF_API_CALLS_MINUTE;
+				sleepTime = 0;
 			
 			seq++;
 			
@@ -421,7 +451,7 @@ public class MACDAgent {
 						"\nHistogram: " + parent.dataHandler.last_buy_histogram.get(cur1 + cur2) + ", limit: " + parent.dataHandler.last_buy_limit.get(cur1 + cur2) +
 						
 						"\nSold at " + price + " - " + 
-						toDate(parent.dataHandler.last_sell.get(cur1 + cur2)) +
+						toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) +
 						"\nHistogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)) + ", limit: " + limit +
 						
 						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2) + 
@@ -438,7 +468,7 @@ public class MACDAgent {
 			
 			parent.logger.logCustom("Buy signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limit, "macd\\" + cur1 + cur2 + "macd.txt");
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
-			parent.dataHandler.last_buy.put(cur1 + cur2, new Date().getTime());
+			parent.dataHandler.last_buy.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
 			parent.dataHandler.last_buy_histogram.put(cur1 + cur2, MACD.get(MACD.size()-1) - signal.get(signal.size()-1));
 			parent.dataHandler.last_buy_limit.put(cur1 + cur2, limit);
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 1);

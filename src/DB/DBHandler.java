@@ -16,6 +16,13 @@ import java.util.Properties;
 import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import Config.Configuration;
 
@@ -425,6 +432,57 @@ public class DBHandler {
 		}
 		
 		return data;
+	}
+	
+	public JSONArray getPriceIntervals(String cur1, String cur2, long start, int arraySize) {
+
+		ResultSet res;
+		JSONArray jArray = new JSONArray();
+		
+		
+		try {
+			String sql = "select tid, timestamp, amount, price from history_" + cur1 + "_" + cur2 + " where timestamp > " + start + " order by timestamp asc limit " + arraySize;
+			
+			System.out.println(sql);
+			res = stm.executeQuery(sql);
+			
+			while(res.next()) {
+				JSONObject jObj = new JSONObject();
+				jObj.put("tid", res.getLong(1));
+				jObj.put("timestamp", res.getLong(2));
+				jObj.put("amount", res.getDouble(3));
+				jObj.put("price", res.getDouble(4));
+				
+				jArray.put(jObj);
+			}
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return jArray;
+	}
+	
+	public double getLastPrice(String cur1, String cur2, long end) {
+
+		ResultSet res;
+		
+		try {
+			String sql = "select price from history_" + cur1 + "_" + cur2 + " where timestamp < " + end + " order by timestamp desc limit 1";
+			
+			System.out.println(sql);
+			
+			res = stm.executeQuery(sql);
+			
+			while(res.next()) {
+				return res.getDouble(1);
+			}
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return -1;
 	}
 	
 	public Object[] getDataPoint(String cur1, String cur2, long currentStamp, long intervals) {

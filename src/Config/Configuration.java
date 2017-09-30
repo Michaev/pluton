@@ -113,7 +113,7 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
@@ -127,19 +127,19 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
 	public static List<String> CURRENCIES = Arrays.asList(
-//			"BTF/XMR/USD",
+			"BTF/XMR/USD",
 			"BTF/OMG/USD",
 			"BTF/IOT/USD",
-//			"BTF/SAN/USD",
-//			"BTF/DSH/USD", 
-//			"BTF/BCH/USD", 
-//			"BTF/BTC/USD", 
+			"BTF/SAN/USD",
+			"BTF/DSH/USD", 
+			"BTF/BCH/USD", 
+			"BTF/BTC/USD", 
 			"BTF/LTC/USD", 
 			"BTF/NEO/USD", 
-//			"BTF/EOS/USD", 
+			"BTF/EOS/USD", 
 			"BTF/ZEC/USD", 
 			"BTF/ETP/USD", 
-//			"BTF/ETC/USD", 
+			"BTF/ETC/USD", 
 			"BTF/ETH/USD");
 
 	
