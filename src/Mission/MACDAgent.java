@@ -494,8 +494,11 @@ public class MACDAgent {
 			parent.logger.logCustom("Buy signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limitBuy, "macd\\" + cur1 + cur2 + "macd.txt");
 
 			double amount = Configuration.BASE_INVESTING_AMOUNT / price;
-			parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", amount);
-			parent.dataHandler.getFunds(cur1).setAmountAvailable(amount);
+			
+			if(!Configuration.TEST) {
+				parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", amount);
+				parent.dataHandler.getFunds(cur1).setAmountAvailable(amount);
+			}
 			
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 			parent.dataHandler.last_buy.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
