@@ -107,6 +107,7 @@ public class DataHandler {
 		this.minTicks.put("BTCUSD", "" + 0.1);
 		
 		orders = new ArrayList<Order>();
+		funds = new ArrayList<Funds>();
 		
 		for(String currency: parent.currencies) {
 			orders.add(new Order(currency.split("/")[1], currency.split("/")[2], this, verbose));
@@ -116,7 +117,6 @@ public class DataHandler {
 		walls = new ArrayList<Wall>();
 		wallIntervals = new ArrayList<WallInterval>();
 		
-		funds = new ArrayList<Funds>();
 	}
 	
 	public Datapoint getPreviousDataPoint(String cur1, String cur2) {

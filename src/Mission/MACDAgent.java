@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import Config.Configuration;
+import Data.Funds;
 import Engine.Pluton;
 
 public class MACDAgent {
@@ -28,6 +29,8 @@ public class MACDAgent {
 	}
 	
 	public void start() {
+
+		parent.dataHandler.loadFunds();
 		
 		// Initialize
 		for(String currency: Configuration.CURRENCIES) {
@@ -47,6 +50,9 @@ public class MACDAgent {
 			parent.dataHandler.macd_funds.put(cur1 + cur2, (double)1000);
 			parent.dataHandler.max_macd_histogram.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.reports.put(cur1 + cur2, "");
+
+			if(parent.dataHandler.getFunds(cur1) == null)
+				parent.dataHandler.getFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
 			
 			if(Configuration.TEST) {
 				cal.add(Calendar.DATE, - Configuration.NUMBER_OF_DAYS_BACKLOAD);
@@ -130,6 +136,8 @@ public class MACDAgent {
 		
 		while(keepRunning) {
 			d = new Date();
+			
+			parent.dataHandler.loadFunds();
 
 			boolean newTick = seq % 5 == 0;
 			
