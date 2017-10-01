@@ -47,7 +47,7 @@ public class Rest_BTF extends REST {
 		jo.put("nonce", Long.toString(auth.getNonce()));
 		jo.put("side", type.toLowerCase());
 		jo.put("type", "exchange market");
-		jo.put("price", price);
+		jo.put("price", Double.toString(price));
 		jo.put("amount", Double.toString(amount));
 		
 		String payload = jo.toString();
