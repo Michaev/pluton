@@ -145,6 +145,9 @@ public class MACDAgent {
 				String cur1 = currency.split("/")[1];
 				String cur2 = currency.split("/")[2];
 				
+				if(parent.dataHandler.getFunds(cur1) == null)
+					parent.dataHandler.getFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
+				
 				long timestamp = d.getTime();
 				
 				if(Configuration.TEST) {
@@ -455,7 +458,7 @@ public class MACDAgent {
 			if(direction == 1) {
 				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limitSell, "macd\\" + cur1 + cur2 + "macd.txt");
 				
-				double amount = parent.dataHandler.getFunds(cur1).getAmountAvailable();
+				double amount = parent.dataHandler.getFunds(cur1.toUpperCase()).getAmountAvailable();
 				
 				if(!Configuration.TEST)
 					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", amount, price);
@@ -505,7 +508,7 @@ public class MACDAgent {
 			
 			if(!Configuration.TEST) {
 				parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", amount, price);
-				parent.dataHandler.getFunds(cur1).setAmountAvailable(amount);
+				parent.dataHandler.getFunds(cur1.toUpperCase()).setAmountAvailable(amount);
 			}
 			
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
