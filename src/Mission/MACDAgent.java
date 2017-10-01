@@ -450,7 +450,7 @@ public class MACDAgent {
 				double amount = parent.dataHandler.getFunds(cur1).getAmountAvailable();
 				
 				if(!Configuration.TEST)
-					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", amount);
+					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", amount, price);
 				
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				parent.dataHandler.last_sell.put(cur1 + cur2, new Date().getTime());
@@ -496,7 +496,7 @@ public class MACDAgent {
 			double amount = Configuration.BASE_INVESTING_AMOUNT / price;
 			
 			if(!Configuration.TEST) {
-				parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", amount);
+				parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", amount, price);
 				parent.dataHandler.getFunds(cur1).setAmountAvailable(amount);
 			}
 			
