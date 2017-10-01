@@ -50,9 +50,12 @@ public class DataHandler {
 	public Map<String, Long> last_sell;
 	public Map<String, Double> last_buy_histogram;
 	public Map<String, Double> last_buy_limit;
+
+	public Map<String, String> reports;
 	
 	public List<Datapoint> datapoints;
 	public double totalResults;
+	public int totalTrades;
 
 	private boolean verbose;
 	
@@ -83,6 +86,7 @@ public class DataHandler {
 		this.rsi_direction = new HashMap<String, Integer>();
 		this.rsi_funds = new HashMap<String, Double>();
 		this.totalResults = 0;
+		this.totalTrades = 0;
 
 		this.max_macd_histogram = new HashMap<String, List<Double>>();
 		this.macd_current_timestamp = new HashMap<String, Long>();
@@ -90,6 +94,8 @@ public class DataHandler {
 		this.last_sell = new HashMap<String, Long>();
 		this.last_buy_histogram = new HashMap<String, Double>();
 		this.last_buy_limit = new HashMap<String, Double>();
+		
+		this.reports = new HashMap<String, String>();
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);

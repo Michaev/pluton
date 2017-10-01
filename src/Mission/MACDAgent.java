@@ -46,6 +46,7 @@ public class MACDAgent {
 			parent.dataHandler.macd_direction.put(cur1 + cur2, -1);
 			parent.dataHandler.macd_funds.put(cur1 + cur2, (double)1000);
 			parent.dataHandler.max_macd_histogram.put(cur1 + cur2, new ArrayList<Double>());
+			parent.dataHandler.reports.put(cur1 + cur2, "");
 			
 			if(Configuration.TEST) {
 				cal.add(Calendar.DATE, - Configuration.NUMBER_OF_DAYS_BACKLOAD);
@@ -184,6 +185,17 @@ public class MACDAgent {
 			}
 			
 		}
+		
+		if(Configuration.TEST) {
+			for(String key: parent.dataHandler.reports.keySet()) {
+				String message = parent.dataHandler.reports.get(key);
+				
+				parent.mailService.sendMail("Trade report: MACD / " + key, message);
+			}
+		}
+		
+		parent.mailService.sendMail("Total report", "Results: " + parent.dataHandler.totalResults + "\nTotal trades: " + 
+				parent.dataHandler.totalTrades);
 		
 		System.out.println("Finished loop");
 	}
@@ -426,13 +438,20 @@ public class MACDAgent {
 		if(limits.size() > Configuration.MACD_LIMIT_SCOPE)
 			limits.remove(0);
 		
-		double limit = (double) Collections.max(limits) / (double) Configuration.MACD_LIMIT;
+		double limitSell = (double) Collections.max(limits) / (double) Configuration.MACD_LIMIT_SELL;
+		double limitBuy = (double) Collections.max(limits) / (double) Configuration.MACD_LIMIT_BUY;
 		
 		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
 		
-		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < - limit && (direction == 1 || direction == -1)) {
+		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < - limitSell && (direction == 1 || direction == -1)) {
 			if(direction == 1) {
-				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limit, "macd\\" + cur1 + cur2 + "macd.txt");
+				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limitSell, "macd\\" + cur1 + cur2 + "macd.txt");
+				
+				double amount = parent.dataHandler.getFunds(cur1).getAmountAvailable();
+				
+				if(!Configuration.TEST)
+					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", amount);
+				
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				parent.dataHandler.last_sell.put(cur1 + cur2, new Date().getTime());
 				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD"));
@@ -452,25 +471,36 @@ public class MACDAgent {
 						
 						"\nSold at " + price + " - " + 
 						toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) +
-						"\nHistogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)) + ", limit: " + limit +
+						"\nHistogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)) + ", limit: " + limitSell +
 						
 						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2) + 
 						"\n\nNew total funds: " + parent.dataHandler.totalResults +
 						"\nnewTick: " + newTick;
-				parent.mailService.sendMail("Trade report: MACD / " + cur1 + cur2, mailMessage);
+				if(!Configuration.TEST)
+					parent.mailService.sendMail("Trade report: MACD / " + cur1 + cur2, mailMessage);
+				else
+					parent.dataHandler.reports.put(cur1 + cur2,
+							parent.dataHandler.reports.get(cur1 + cur2) + "\n----------------\n" + mailMessage);
+				
+				parent.dataHandler.totalTrades++;
 			}
 			else
 				System.out.println("Setting MACD trend for " + cur1 + cur2 + " to Down.");
 
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
 		}
-		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > limit &&  (direction == 0 || direction == -1)) {
+		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > limitBuy &&  (direction == 0 || direction == -1)) {
 			
-			parent.logger.logCustom("Buy signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limit, "macd\\" + cur1 + cur2 + "macd.txt");
+			parent.logger.logCustom("Buy signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limitBuy, "macd\\" + cur1 + cur2 + "macd.txt");
+
+			double amount = Configuration.BASE_INVESTING_AMOUNT / price;
+			parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", amount);
+			parent.dataHandler.getFunds(cur1).setAmountAvailable(amount);
+			
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 			parent.dataHandler.last_buy.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
 			parent.dataHandler.last_buy_histogram.put(cur1 + cur2, MACD.get(MACD.size()-1) - signal.get(signal.size()-1));
-			parent.dataHandler.last_buy_limit.put(cur1 + cur2, limit);
+			parent.dataHandler.last_buy_limit.put(cur1 + cur2, limitBuy);
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
 		}
 		

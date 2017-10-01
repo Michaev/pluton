@@ -31,7 +31,7 @@ public class Configuration {
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
-	public static boolean TEST = true;
+	public static boolean TEST = false;
 	
 	public static double JUMP_LIMIT = 1.003;
 	public static double JUMP_LIMIT_VOL = 5;
@@ -42,8 +42,10 @@ public class Configuration {
 	public static int MACD_EMA_1 = 12;
 	public static int MACD_EMA_2 = 26;
 	public static int MACD_SIGNAL_LINE = 9;
-	public static int MACD_TIME_PERIOD = 15 * 60000; // 15 minute periods
-	public static int MACD_LIMIT = 8;
+	//public static int MACD_TIME_PERIOD = 15 * 60000; // 15 minute periods
+	public static int MACD_TIME_PERIOD = 30 * 60000; // 15 minute periods
+	public static int MACD_LIMIT_BUY = 5;
+	public static int MACD_LIMIT_SELL = 20;
 	public static int MACD_LIMIT_SCOPE = 50;
 	
 	public static int RSI1 = 14;
