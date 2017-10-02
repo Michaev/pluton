@@ -19,6 +19,7 @@ public class DataHandler {
 	public List<TickSize> tickSizes;
 	
 	public List<Funds> funds;
+	public List<Funds> marginFunds;
 	
 	public Map<String, String> volume24h;
 	public Map<String, String> minTicks;
@@ -120,6 +121,7 @@ public class DataHandler {
 		
 		orders = new ArrayList<Order>();
 		funds = new ArrayList<Funds>();
+		marginFunds = new ArrayList<Funds>();
 		
 		for(String currency: parent.currencies) {
 			orders.add(new Order(currency.split("/")[1], currency.split("/")[2], this, verbose));
@@ -149,6 +151,7 @@ public class DataHandler {
 	public void loadFunds() {
 		
 		funds.clear();
+		marginFunds.clear();
 		
 		JSONArray jFunds = parent.restHandler_btf.getFunds();
 		
@@ -162,6 +165,9 @@ public class DataHandler {
 			
 			if(type.equals("exchange"))
 				funds.add(new Funds(currency.toUpperCase(), available, amount));
+			
+			if(type.equals("margin"))
+				marginFunds.add(new Funds(currency.toUpperCase(), available, amount));
 		}
 	}
 	
@@ -173,6 +179,19 @@ public class DataHandler {
 		for(Funds funds: getFunds()) {
 			if(funds.currency.equals(currency.toUpperCase()))
 				return funds;
+		}
+		
+		return null;
+	}
+	
+	public List<Funds> getMarginFunds() {
+		return this.marginFunds;
+	}
+	
+	public Funds getMarginFunds(String currency) {
+		for(Funds marginFunds: getMarginFunds()) {
+			if(marginFunds.currency.equals(currency.toUpperCase()))
+				return marginFunds;
 		}
 		
 		return null;

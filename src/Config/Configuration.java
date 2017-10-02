@@ -27,7 +27,7 @@ public class Configuration {
 	public static String mail = "!1Pluton67";
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
-	public static int NUMBER_OF_DAYS_BACKLOAD = 5;
+	public static int NUMBER_OF_DAYS_BACKLOAD = 30;
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;

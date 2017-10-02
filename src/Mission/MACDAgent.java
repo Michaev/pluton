@@ -48,12 +48,22 @@ public class MACDAgent {
 			parent.dataHandler.historyMACD_signal.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.macd_direction.put(cur1 + cur2, -1);
 			parent.dataHandler.macd_funds.put(cur1 + cur2, (double)1000);
+			parent.dataHandler.macd_funds_short.put(cur1 + cur2, (double)1000);
 			parent.dataHandler.max_macd_histogram.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.reports.put(cur1 + cur2, "");
 			parent.dataHandler.reportsShort.put(cur1 + cur2, "");
 
 			if(parent.dataHandler.getFunds(cur1) == null)
 				parent.dataHandler.getFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
+			
+			if(parent.dataHandler.getMarginFunds(cur1) == null)
+				parent.dataHandler.getMarginFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
+			
+			if(parent.dataHandler.getFunds(cur1).getAmountAvailable() > 0.01)
+				parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
+			
+			if(parent.dataHandler.getMarginFunds(cur1).getAmountAvailable() > 0.01)
+				parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
 			
 			if(Configuration.TEST) {
 				cal.add(Calendar.DATE, - Configuration.NUMBER_OF_DAYS_BACKLOAD);
@@ -148,6 +158,9 @@ public class MACDAgent {
 				
 				if(parent.dataHandler.getFunds(cur1) == null)
 					parent.dataHandler.getFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
+				
+				if(parent.dataHandler.getMarginFunds(cur1) == null)
+					parent.dataHandler.getMarginFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
 				
 				long timestamp = d.getTime();
 				
@@ -474,8 +487,9 @@ public class MACDAgent {
 					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "exchange market", amount, price);
 					
 					if(Configuration.MARGIN_ENABLED) {
-						parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "market", amount, price);
-						parent.dataHandler.short_positions.put(cur1 + cur2, amount);
+						double shortAmount = Configuration.BASE_INVESTING_AMOUNT / price;
+						parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "market", shortAmount, price);
+						parent.dataHandler.short_positions.put(cur1 + cur2, shortAmount);
 						parent.dataHandler.short_positions_price.put(cur1 + cur2, price);
 					}
 				}
@@ -498,7 +512,7 @@ public class MACDAgent {
 						"\nHistogram: " + parent.dataHandler.last_buy_histogram.get(cur1 + cur2) + ", limit: " + parent.dataHandler.last_buy_limit.get(cur1 + cur2) +
 						
 						"\nSold at " + price + " - " + 
-						(Configuration.TEST ? toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) : new Date().getTime()) +
+						(Configuration.TEST ? toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) : toDate(new Date().getTime())) +
 						"\nHistogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)) + ", limit: " + limitSell +
 						
 						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2) + 
