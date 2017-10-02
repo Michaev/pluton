@@ -481,7 +481,7 @@ public class MACDAgent {
 						"\nHistogram: " + parent.dataHandler.last_buy_histogram.get(cur1 + cur2) + ", limit: " + parent.dataHandler.last_buy_limit.get(cur1 + cur2) +
 						
 						"\nSold at " + price + " - " + 
-						toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) +
+						(Configuration.TEST ? toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) : new Date().getTime()) +
 						"\nHistogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)) + ", limit: " + limitSell +
 						
 						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2) + 
@@ -512,7 +512,12 @@ public class MACDAgent {
 			}
 			
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
-			parent.dataHandler.last_buy.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
+			
+			if(Configuration.TEST)
+				parent.dataHandler.last_buy.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
+			else
+				parent.dataHandler.last_buy.put(cur1 + cur2, new Date().getTime());
+			
 			parent.dataHandler.last_buy_histogram.put(cur1 + cur2, MACD.get(MACD.size()-1) - signal.get(signal.size()-1));
 			parent.dataHandler.last_buy_limit.put(cur1 + cur2, limitBuy);
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
