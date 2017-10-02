@@ -7,10 +7,10 @@ import java.util.Map;
 
 public class Configuration {
 	
-	//public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
+	public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
 	//public static String MODE = "simulation";					// Stage 3a - Simulate strategy
-	public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
+	//public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
 	//public static String MODE = "pluton";						// Stage 4 - let's roll
 
 	//public static String MODE = "test_mail";					// Test mail
@@ -130,12 +130,12 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
 	public static List<String> CURRENCIES = Arrays.asList(
-			"BTF/XMR/USD",
-			"BTF/OMG/USD",
-			"BTF/IOT/USD",
-			"BTF/SAN/USD",
-			"BTF/DSH/USD", 
-			"BTF/BCH/USD", 
+//			"BTF/XMR/USD",
+//			"BTF/OMG/USD",
+//			"BTF/IOT/USD",
+//			"BTF/SAN/USD",
+//			"BTF/DSH/USD", 
+//			"BTF/BCH/USD", 
 			"BTF/BTC/USD", 
 			"BTF/LTC/USD", 
 			"BTF/NEO/USD", 
