@@ -151,7 +151,6 @@ public class DataHandler {
 	public void loadFunds() {
 		
 		funds.clear();
-		marginFunds.clear();
 		
 		JSONArray jFunds = parent.restHandler_btf.getFunds();
 		
@@ -166,8 +165,25 @@ public class DataHandler {
 			if(type.equals("exchange"))
 				funds.add(new Funds(currency.toUpperCase(), available, amount));
 			
-			if(type.equals("margin"))
-				marginFunds.add(new Funds(currency.toUpperCase(), available, amount));
+			// Move to positions
+//			if(type.equals("margin"))
+//				marginFunds.add(new Funds(currency.toUpperCase(), available, amount));
+		}
+	}
+	
+	public void loadShortPositions() {
+		
+		marginFunds.clear();
+		
+		JSONArray jFunds = parent.restHandler_btf.getShortPositions();
+		
+		for(int i = 0; i < jFunds.length(); i++) {
+			
+			JSONObject jFund = jFunds.getJSONObject(i);
+			String currency = jFund.getString("symbol").substring(0, 3);
+			double amount = Math.abs(jFund.getDouble("amount"));
+			
+			marginFunds.add(new Funds(currency.toUpperCase(), 0, amount));
 		}
 	}
 	

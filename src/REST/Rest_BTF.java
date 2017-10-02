@@ -557,6 +557,50 @@ public class Rest_BTF extends REST {
 		return jsonResponse.getBody().getArray();
 	}
 	
+	public JSONArray getShortPositions() {
+		HttpResponse<JsonNode> jsonResponse = null;
+		
+		String url = "https://api.bitfinex.com/v1/positions";
+		System.out.println(url);
+
+		auth.upNonce();
+		JSONObject jo = new JSONObject();
+		jo.put("request", "/v1/positions");
+		jo.put("nonce", Long.toString(auth.getNonce()));
+		
+		String payload = jo.toString();
+		
+		String payload_base64 = Base64.getEncoder().encodeToString(payload.getBytes());
+		
+		String payload_sha384hmac = hmacDigest(payload_base64, auth.getSecret(), "HmacSHA384");
+
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("x-bfx-payload", payload_base64);
+		headers.put("x-bfx-apikey", auth.getApi());
+		headers.put("x-bfx-signature", payload_sha384hmac);
+		
+		do {
+			try {
+				jsonResponse = Unirest.get(url)
+						  .headers(headers)
+						  .asJson();
+				
+				if(jsonResponse == null) {
+					Thread.sleep(Configuration.API_TIMEOUT_RETRY);
+				}
+			} catch (UnirestException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} while(jsonResponse == null);
+		
+		//if(verbose)	System.out.println("getFunds: " + jsonResponse.getBody().getArray());
+		
+		return jsonResponse.getBody().getArray();
+	}
+	
 	public JSONArray get24HVolume(String cur1, String cur2) {
 		HttpResponse<JsonNode> jsonResponse = null;
 		

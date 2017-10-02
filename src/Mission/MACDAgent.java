@@ -31,6 +31,7 @@ public class MACDAgent {
 	public void start() {
 
 		parent.dataHandler.loadFunds();
+		parent.dataHandler.loadShortPositions();
 		
 		// Initialize
 		for(String currency: Configuration.CURRENCIES) {
@@ -62,8 +63,10 @@ public class MACDAgent {
 			if(parent.dataHandler.getFunds(cur1).getAmountAvailable() > 0.01)
 				parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
 			
-			if(parent.dataHandler.getMarginFunds(cur1).getAmountAvailable() > 0.01)
+			if(parent.dataHandler.getMarginFunds(cur1).getAmountAvailable() > 0.01) {
 				parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
+				parent.dataHandler.short_positions.put(cur1 + cur2, parent.dataHandler.getMarginFunds(cur1).getAmountAvailable());
+			}
 			
 			if(Configuration.TEST) {
 				cal.add(Calendar.DATE, - Configuration.NUMBER_OF_DAYS_BACKLOAD);
@@ -149,6 +152,7 @@ public class MACDAgent {
 			d = new Date();
 			
 			parent.dataHandler.loadFunds();
+			parent.dataHandler.loadShortPositions();
 
 			boolean newTick = seq % 5 == 0;
 			
