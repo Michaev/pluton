@@ -50,6 +50,7 @@ public class MACDAgent {
 			parent.dataHandler.macd_funds.put(cur1 + cur2, (double)1000);
 			parent.dataHandler.max_macd_histogram.put(cur1 + cur2, new ArrayList<Double>());
 			parent.dataHandler.reports.put(cur1 + cur2, "");
+			parent.dataHandler.reportsShort.put(cur1 + cur2, "");
 
 			if(parent.dataHandler.getFunds(cur1) == null)
 				parent.dataHandler.getFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
@@ -203,10 +204,19 @@ public class MACDAgent {
 				
 				parent.mailService.sendMail("Trade report: MACD / " + key, message);
 			}
+			
+			for(String key: parent.dataHandler.reportsShort.keySet()) {
+				String message = parent.dataHandler.reportsShort.get(key);
+				
+				parent.mailService.sendMail("Trade report: MACD / " + key, message);
+			}
 		}
 		
 		parent.mailService.sendMail("Total report", "Results: " + parent.dataHandler.totalResults + "\nTotal trades: " + 
 				parent.dataHandler.totalTrades);
+		
+		parent.mailService.sendMail("Total report", "Results: " + parent.dataHandler.totalResultsShort + "\nTotal shorts: " + 
+				parent.dataHandler.totalTradesShort);
 		
 		System.out.println("Finished loop");
 	}
@@ -466,6 +476,7 @@ public class MACDAgent {
 					if(Configuration.MARGIN_ENABLED) {
 						parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "market", amount, price);
 						parent.dataHandler.short_positions.put(cur1 + cur2, amount);
+						parent.dataHandler.short_positions_price.put(cur1 + cur2, price);
 					}
 				}
 					
@@ -519,8 +530,37 @@ public class MACDAgent {
 				if(Configuration.MARGIN_ENABLED) {
 					if(parent.dataHandler.short_positions.get(cur1 + cur2) != null) {
 						double shortAmount = parent.dataHandler.short_positions.get(cur1 + cur2);
+						double shortPrice = parent.dataHandler.short_positions_price.get(cur1 + cur2);
+						
 						parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", "market", shortAmount, price);
 						parent.dataHandler.short_positions.remove(cur1 + cur2);
+						parent.dataHandler.short_positions_price.remove(cur1 + cur2);
+						
+						
+						double gain = price / shortPrice;
+						gain -= 0.004;
+						
+						parent.dataHandler.macd_funds_short.put(cur1 + cur2,  
+								parent.dataHandler.macd_funds_short.get(cur1 + cur2) + (1000 * gain) - 1000);
+						
+						parent.dataHandler.totalResultsShort = parent.dataHandler.totalResultsShort + (1000 * gain) - 1000;
+						
+						parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds_short.get(cur1 + cur2), "macd\\" + cur1 + cur2 + "macdshort.txt");
+						
+						String mailMessage = 
+								"Closed short position at " + price +
+								"\nSold at " + shortPrice + " - " + 
+								"\nGain: " + gain + "\n\nNew Margin funds: " + parent.dataHandler.macd_funds_short.get(cur1 + cur2) + 
+								"\n\nNew total margin results: " + parent.dataHandler.totalResultsShort +
+								"\nnewTick: " + newTick;
+						if(!Configuration.TEST)
+							parent.mailService.sendMail("Short trade report: MACD / " + cur1 + cur2, mailMessage);
+						else
+							parent.dataHandler.reportsShort.put(cur1 + cur2,
+									parent.dataHandler.reportsShort.get(cur1 + cur2) + "\n----------------\n" + mailMessage);
+						
+						parent.dataHandler.totalTradesShort++;
+						
 					}
 				}
 			}
