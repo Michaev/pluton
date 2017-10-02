@@ -460,9 +460,15 @@ public class MACDAgent {
 				
 				double amount = parent.dataHandler.getFunds(cur1.toUpperCase()).getAmountAvailable();
 				
-				if(!Configuration.TEST)
-					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", amount, price);
-				
+				if(!Configuration.TEST) {
+					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "exchange market", amount, price);
+					
+					if(Configuration.MARGIN_ENABLED) {
+						parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "market", amount, price);
+						parent.dataHandler.short_positions.put(cur1 + cur2, amount);
+					}
+				}
+					
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				parent.dataHandler.last_sell.put(cur1 + cur2, new Date().getTime());
 				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD"));
@@ -507,8 +513,16 @@ public class MACDAgent {
 			double amount = Configuration.BASE_INVESTING_AMOUNT / price;
 			
 			if(!Configuration.TEST) {
-				parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", amount, price);
+				parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", "exchange market", amount, price);
 				parent.dataHandler.getFunds(cur1.toUpperCase()).setAmountAvailable(amount);
+				
+				if(Configuration.MARGIN_ENABLED) {
+					if(parent.dataHandler.short_positions.get(cur1 + cur2) != null) {
+						double shortAmount = parent.dataHandler.short_positions.get(cur1 + cur2);
+						parent.restHandler_btf.placeMarketOrder(cur1, cur2, "buy", "market", shortAmount, price);
+						parent.dataHandler.short_positions.remove(cur1 + cur2);
+					}
+				}
 			}
 			
 			parent.dataHandler.buyPrices.put(cur1 + cur2 + "MACD", Double.toString(price));

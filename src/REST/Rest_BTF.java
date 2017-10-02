@@ -34,7 +34,7 @@ public class Rest_BTF extends REST {
 		this.auth = new Auth_BTF(verbose);
 	}
 	
-	public long placeMarketOrder(String cur1, String cur2, String type, double amount, double price) {
+	public long placeMarketOrder(String cur1, String cur2, String type, String marketType, double amount, double price) {
 		HttpResponse<JsonNode> jsonResponse = null;
 		
 		String url = "https://api.bitfinex.com/v1/order/new";
@@ -46,7 +46,7 @@ public class Rest_BTF extends REST {
 		jo.put("signature", auth.getSignature());
 		jo.put("nonce", Long.toString(auth.getNonce()));
 		jo.put("side", type.toLowerCase());
-		jo.put("type", "exchange market");
+		jo.put("type", marketType);
 		jo.put("price", Double.toString(price));
 		jo.put("amount", Double.toString(amount));
 		

@@ -32,6 +32,7 @@ public class Configuration {
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
 	public static boolean TEST = false;
+	public static boolean MARGIN_ENABLED = true;
 	
 	public static double JUMP_LIMIT = 1.003;
 	public static double JUMP_LIMIT_VOL = 5;

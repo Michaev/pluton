@@ -50,6 +50,7 @@ public class DataHandler {
 	public Map<String, Long> last_sell;
 	public Map<String, Double> last_buy_histogram;
 	public Map<String, Double> last_buy_limit;
+	public Map<String, Double> short_positions;
 
 	public Map<String, String> reports;
 	
@@ -94,6 +95,7 @@ public class DataHandler {
 		this.last_sell = new HashMap<String, Long>();
 		this.last_buy_histogram = new HashMap<String, Double>();
 		this.last_buy_limit = new HashMap<String, Double>();
+		this.short_positions = new HashMap<String, Double>();
 		
 		this.reports = new HashMap<String, String>();
 
