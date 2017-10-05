@@ -27,7 +27,9 @@ public class DataHandler {
 	public Map<String, String> peakPrices;
 	public Map<String, String> buyTimestamps;
 	public Map<String, String> buyPrices;
+	public Map<String, String> buyChanges;
 	public Map<String, String> sellPrices;
+	public Map<String, String> sellChanges;
 	public Map<String, String> activeOrders;
 	public Map<String, List<Double>> historyMACD_prices;
 	public Map<String, List<Double>> historyMACD_EMA1;
@@ -42,6 +44,11 @@ public class DataHandler {
 	public Map<String, Integer> macd_direction;
 	public Map<String, Double> macd_funds;
 	public Map<String, Double> macd_funds_short;
+	public Map<String, Boolean> macd_stoploss_long;
+	public Map<String, Boolean> macd_stoploss_short;
+	
+	public Map<String, Double> macd_stop_loss_limit;
+	public Map<String, Double> macd_stop_loss_limit_short;
 	
 	public Map<String, Integer> rsi_direction;
 	public Map<String, Double> rsi_funds;
@@ -76,7 +83,9 @@ public class DataHandler {
 		this.peakPrices = new HashMap<String, String>();
 		this.buyTimestamps = new HashMap<String, String>();
 		this.buyPrices = new HashMap<String, String>();
+		this.buyChanges = new HashMap<String, String>();
 		this.sellPrices = new HashMap<String, String>();
+		this.sellChanges = new HashMap<String, String>();
 		this.activeOrders = new HashMap<String, String>();
 		this.historyMACD_prices = new HashMap<String, List<Double>>();
 		this.historyMACD_EMA1 = new HashMap<String, List<Double>>();
@@ -98,6 +107,9 @@ public class DataHandler {
 		this.totalResultsShort = 0;
 		this.totalTradesShort = 0;
 
+		this.macd_stop_loss_limit = new HashMap<String, Double>();
+		this.macd_stop_loss_limit_short = new HashMap<String, Double>();
+		
 		this.max_macd_histogram = new HashMap<String, List<Double>>();
 		this.macd_current_timestamp = new HashMap<String, Long>();
 		this.last_buy = new HashMap<String, Long>();
@@ -109,6 +121,9 @@ public class DataHandler {
 		
 		this.reports = new HashMap<String, String>();
 		this.reportsShort = new HashMap<String, String>();
+		
+		this.macd_stoploss_long = new HashMap<String, Boolean>();
+		this.macd_stoploss_short = new HashMap<String, Boolean>();
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);

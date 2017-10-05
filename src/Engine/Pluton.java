@@ -175,8 +175,26 @@ public class Pluton {
 		}
 		
 		if(Configuration.MODE.equals("simulation_MACD")) {
-			MACDAgent macdAgent = new MACDAgent(this);
-			macdAgent.start();
+			
+			List<Double> stop_limits = new ArrayList<Double>();
+//			stop_limits.add(0.9);
+//			stop_limits.add(0.91);
+//			stop_limits.add(0.92);
+//			stop_limits.add(0.93);
+//			stop_limits.add(0.94);
+//			stop_limits.add(0.95);
+//
+//			stop_limits.add(0.96);
+			stop_limits.add(0.97);
+//			stop_limits.add(0.98);
+//			stop_limits.add(0.99);
+			
+			for(double stop_limit: stop_limits) {
+				
+				Configuration.STOP_LOSS_LIMIT = stop_limit;
+				MACDAgent macdAgent = new MACDAgent(this);
+				macdAgent.start();
+			}
 			
 			logger.logDebug("Finished loading MACD history");
 			System.exit(0);

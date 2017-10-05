@@ -407,10 +407,19 @@ public class HistoryLoader {
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DAY_OF_MONTH, -Configuration.NUMBER_OF_DAYS_BACKLOAD);
 		
+		// Custom testing
+//		cal.add(Calendar.DATE, -30);
+		// End custom testing
+		
 		long timestamp = cal.getTime().getTime(); 				// v2
 		//long timestamp = cal.getTime().getTime();  / 1000 	// Bfx API v1 receives timestamp parameters in seconds
 		
 		long lastLoad = -1;
+
+		// Custom testing
+		cal.add(Calendar.DATE, 32);
+		long finalTimestamp = cal.getTimeInMillis();
+		// End custom testing
 
 		parent.dbHandler.createTable(cur1, cur2);
 		
@@ -418,10 +427,14 @@ public class HistoryLoader {
 			System.out.println("Time since last load: " + (new Date().getTime() - lastLoad));
 			lastLoad = new Date().getTime();
 			
+			
 			parent.logger.logDebug("Loading trades starting at timestamp " + timestamp);
 			timestamp = loadHistoryArray(timestamp, cur1, cur2);
+			if(timestamp > finalTimestamp)
+				timestamp = -1;
 			
 			long sleepTime = new Date().getTime() - lastLoad - (60000 / Configuration.NUMBER_OF_API_CALLS_MINUTE);
+			
 			if(sleepTime < 0) {
 				try {
 					System.out.println("Sleeping " + -sleepTime + "ms to avoid API block");

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Configuration {
 	
-	//public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
+//	public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
 	//public static String MODE = "simulation";					// Stage 3a - Simulate strategy
 	public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
@@ -31,12 +31,14 @@ public class Configuration {
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
-	public static boolean TEST = false;
+	public static boolean TEST = true;
+	public static boolean TEST_DETAILED_REPORT = false;
 	public static boolean MARGIN_ENABLED = true;
 	
 	public static double JUMP_LIMIT = 1.003;
-	public static double JUMP_LIMIT_VOL = 5;
-	public static double STOP_LOSS_LIMIT = 0.992; 	// How big percentage loss before dropping
+	public static double JUMP_LIMIT_VOL = 3;
+	public static double STOP_LOSS_LIMIT = 0.97; 	// How big percentage loss before dropping
+	public static double STOP_LOSS_LIMIT_SHORT = 0.96; // tested
 	public static double ROI_GOAL = 1.04; 			// How many percentage return on investment to expect per trade
 	public static double SLIPPAGE_LIMIT = 1.004;
 	
@@ -45,9 +47,10 @@ public class Configuration {
 	public static int MACD_SIGNAL_LINE = 9;
 	//public static int MACD_TIME_PERIOD = 15 * 60000; // 15 minute periods
 	public static int MACD_TIME_PERIOD = 30 * 60000; // 15 minute periods
-	public static int MACD_LIMIT_BUY = 5;
-	public static int MACD_LIMIT_SELL = 20;
-	public static int MACD_LIMIT_SCOPE = 50;
+	public static int MACD_LIMIT_BUY = 2;
+	public static int MACD_LIMIT_SELL = 8;
+	public static int MACD_LIMIT_SCOPE = 200;
+	public static double MACD_HISTOGRAM_GAIN_TRESHOLD = 2;
 	
 	public static int RSI1 = 14;
 	public static int RSISTOCH1 = 14;
@@ -108,7 +111,7 @@ public class Configuration {
 	
 	// 3. Training.
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/IOT/USD", "BTF/LTC/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/NEO/USD");
@@ -118,9 +121,10 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/EOS/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/EOS/USD");
+	//public static List<String> CURRENCIES = Arrays.asList("BTF/XRP/USD");
 	
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD", "BTF/BCH/USD", "BTF/ETH/USD", "BTF/LTC/USD");
 
@@ -143,6 +147,7 @@ public class Configuration {
 			"BTF/ZEC/USD", 
 			"BTF/ETP/USD", 
 			"BTF/ETC/USD", 
+			"BTF/XRP/USD", 
 			"BTF/ETH/USD");
 
 	
