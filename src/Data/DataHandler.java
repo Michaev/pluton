@@ -61,9 +61,24 @@ public class DataHandler {
 	public Map<String, Double> last_buy_limit;
 	public Map<String, Double> short_positions;
 	public Map<String, Double> short_positions_price;
+	
+	public Map<String, Integer> macd_config_limit_buy;
+	public Map<String, Integer> macd_config_limit_sell;
+	public Map<String, Integer> macd_config_limit_scope;
+	public Map<String, Double> macd_config_hist_gain_treshold_buy;
+	public Map<String, Double> macd_config_hist_gain_treshold_sell;
+	
+	public Map<String, Double> macd_highest_price;
+	public Map<String, Double> macd_lowest_price;
 
 	public Map<String, String> reports;
 	public Map<String, String> reportsShort;
+	
+	public Map<String, Boolean> testFinished;
+	public Map<String, Boolean> inertia;
+	
+	public Map<String, Long> tradingHaltShort;
+	public Map<String, Long> tradingHaltLong;
 	
 	public List<Datapoint> datapoints;
 	public double totalResults;
@@ -107,6 +122,12 @@ public class DataHandler {
 		this.totalResultsShort = 0;
 		this.totalTradesShort = 0;
 
+		this.testFinished = new HashMap<String, Boolean>();
+		this.inertia = new HashMap<String, Boolean>();
+		
+		this.macd_highest_price = new HashMap<String, Double>();
+		this.macd_lowest_price = new HashMap<String, Double>();
+		
 		this.macd_stop_loss_limit = new HashMap<String, Double>();
 		this.macd_stop_loss_limit_short = new HashMap<String, Double>();
 		
@@ -124,6 +145,15 @@ public class DataHandler {
 		
 		this.macd_stoploss_long = new HashMap<String, Boolean>();
 		this.macd_stoploss_short = new HashMap<String, Boolean>();
+		
+		this.tradingHaltLong = new HashMap<String, Long>();
+		this.tradingHaltShort = new HashMap<String, Long>();
+		
+		macd_config_limit_buy = new HashMap<String, Integer>();
+		macd_config_limit_sell = new HashMap<String, Integer>();
+		macd_config_limit_scope = new HashMap<String, Integer>();
+		macd_config_hist_gain_treshold_buy = new HashMap<String, Double>();
+		macd_config_hist_gain_treshold_sell = new HashMap<String, Double>();
 
 		this.minTicks = new HashMap<String, String>();
 		this.minTicks.put("BCHUSD", "" + 0.01);

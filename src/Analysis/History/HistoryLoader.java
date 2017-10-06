@@ -417,8 +417,8 @@ public class HistoryLoader {
 		long lastLoad = -1;
 
 		// Custom testing
-		cal.add(Calendar.DATE, 32);
-		long finalTimestamp = cal.getTimeInMillis();
+//		cal.add(Calendar.DATE, 32);
+//		long finalTimestamp = cal.getTimeInMillis();
 		// End custom testing
 
 		parent.dbHandler.createTable(cur1, cur2);
@@ -430,8 +430,6 @@ public class HistoryLoader {
 			
 			parent.logger.logDebug("Loading trades starting at timestamp " + timestamp);
 			timestamp = loadHistoryArray(timestamp, cur1, cur2);
-			if(timestamp > finalTimestamp)
-				timestamp = -1;
 			
 			long sleepTime = new Date().getTime() - lastLoad - (60000 / Configuration.NUMBER_OF_API_CALLS_MINUTE);
 			
@@ -464,7 +462,7 @@ public class HistoryLoader {
 		}
 		
 		if(latestTimestamp == -2) {
-			latestTimestamp = timestamp + (3600 * 1000); // Increase timestamp by one hour manually to avoid exit on empty json returns.
+			latestTimestamp = timestamp + (12 * 3600 * 1000); // Increase timestamp by one hour manually to avoid exit on empty json returns.
 		}
 			
 		return latestTimestamp;

@@ -26,6 +26,7 @@ import MarketBuildTraining.MarketPrune;
 import MarketBuildTraining.MarketTrain;
 import Mission.MACDAgent;
 import Mission.MissionHandler;
+import News.NewsAgent;
 import Output.Logger;
 import REST.Rest_BTF;
 import REST.Rest_CEX;
@@ -197,6 +198,14 @@ public class Pluton {
 			}
 			
 			logger.logDebug("Finished loading MACD history");
+			System.exit(0);
+		}
+		
+		if(Configuration.MODE.equals("news")) {
+			System.out.println("News mode");
+			NewsAgent news = new NewsAgent(this);
+			news.start();
+			
 			System.exit(0);
 		}
 		

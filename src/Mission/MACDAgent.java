@@ -5,12 +5,15 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import Config.ConfigLoader;
 import Config.Configuration;
+import Data.DataHandler;
 import Data.Funds;
 import Engine.Pluton;
 
@@ -35,7 +38,8 @@ public class MACDAgent {
 			parent.dataHandler.loadShortPositions();
 		}
 
-		fillStopLossValues();
+		ConfigLoader configLoader = new ConfigLoader(parent);
+		configLoader.fillConfigValues();
 		
 		// Initialize
 		for(String currency: Configuration.CURRENCIES) {
@@ -59,11 +63,16 @@ public class MACDAgent {
 			parent.dataHandler.reportsShort.put(cur1 + cur2, "");
 			parent.dataHandler.macd_stoploss_long.put(cur1 + cur2, false);
 			parent.dataHandler.macd_stoploss_short.put(cur1 + cur2, false);
+			parent.dataHandler.tradingHaltLong.put(cur1 + cur2, 0L);
+			parent.dataHandler.tradingHaltShort.put(cur1 + cur2, 0L);
+			parent.dataHandler.macd_lowest_price.put(cur1 + cur2, 0.0);
+			parent.dataHandler.macd_highest_price.put(cur1 + cur2, 0.0);
 			
 			
 			if(Configuration.TEST) {
 				parent.dataHandler.getFunds().add(new Funds(cur1, 0, 0));
 				parent.dataHandler.getMarginFunds().add(new Funds(cur1, 0, 0));
+				parent.dataHandler.testFinished.put(cur1 + cur2, false);
 			}
 			
 			if(parent.dataHandler.getFunds(cur1) == null)
@@ -172,11 +181,22 @@ public class MACDAgent {
 				parent.dataHandler.loadShortPositions();
 			}
 			
-			boolean newTick = seq % 5 == 0;
+			if(Configuration.TEST) {
+				keepRunning = false;
+				for(String k: parent.dataHandler.testFinished.keySet()) {
+					if(!parent.dataHandler.testFinished.get(k))
+						keepRunning = true;
+				}
+			}
+			
+			boolean newTick = seq % Configuration.NUMBER_OF_TICKS_IN_PERIOD == 0;
 			
 			for(String currency: Configuration.CURRENCIES) {
 				String cur1 = currency.split("/")[1];
 				String cur2 = currency.split("/")[2];
+				
+				if(parent.dataHandler.testFinished.get(cur1 + cur2))
+					continue;
 				
 				if(parent.dataHandler.getFunds(cur1) == null)
 					parent.dataHandler.getFunds().add(new Funds(cur1.toUpperCase(), 0, 0));
@@ -209,7 +229,7 @@ public class MACDAgent {
 					
 					if(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2) > startDate) {
 						System.out.println("last date: " + parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
-						keepRunning = false;
+						parent.dataHandler.testFinished.put(cur1 + cur2, true);
 					}
 					
 				}
@@ -222,7 +242,7 @@ public class MACDAgent {
 			
 			System.out.println("Last trade: " + toDate(endDate));
 			
-			long sleepTime = (Configuration.MACD_TIME_PERIOD / 5 ) - (new Date().getTime() - d.getTime());
+			long sleepTime = (Configuration.MACD_TIME_PERIOD / Configuration.NUMBER_OF_TICKS_IN_PERIOD ) - (new Date().getTime() - d.getTime());
 			
 			if(Configuration.TEST)
 				sleepTime = 0;
@@ -255,15 +275,37 @@ public class MACDAgent {
 			}
 		}
 		
+		String curConfigs = "";
+		for(String cur: parent.currencies) {
+			
+			String cur1 = cur.split("/")[1];
+			String cur2 = cur.split("/")[2];
+			
+			curConfigs += cur1 + cur2 + ":\n";
+			curConfigs += "limit buy; " + parent.dataHandler.macd_config_limit_buy.get(cur1 + cur2) + "\n";
+			curConfigs += "limit sell: " + parent.dataHandler.macd_config_limit_sell.get(cur1 + cur2) + "\n";
+			curConfigs += "gain treshold buy: " + parent.dataHandler.macd_config_hist_gain_treshold_buy.get(cur1 + cur2) + "\n";
+			curConfigs += "gain treshold sell: " + parent.dataHandler.macd_config_hist_gain_treshold_sell.get(cur1 + cur2) + "\n";
+			curConfigs += "scope: " + parent.dataHandler.macd_config_limit_scope.get(cur1 + cur2) + "\n";
+			curConfigs += "stop-loss long: " + parent.dataHandler.macd_stop_loss_limit.get(cur1 + cur2) + "\n";
+			curConfigs += "stop-loss short: " + parent.dataHandler.macd_stop_loss_limit_short.get(cur1 + cur2) + "\n";
+		}
+		
 		parent.mailService.sendMail("Test ttreport", "Results: " + parent.dataHandler.totalResults + "\nTotal trades: " + 
-				parent.dataHandler.totalTrades + "\nBuy limit: " + Configuration.MACD_LIMIT_BUY + 
-				"\nHistogram limit: " + Configuration.MACD_HISTOGRAM_GAIN_TRESHOLD +
-				"\nSell limit: " + Configuration.MACD_LIMIT_SELL);
+				parent.dataHandler.totalTrades +
+				"\nMACD1: " + Configuration.MACD_EMA_1 + ", MACD2: " + Configuration.MACD_EMA_2 + ", Signal: " + Configuration.MACD_SIGNAL_LINE +
+				"\nMACD_PERIOD_TIME: " + Configuration.MACD_TIME_PERIOD +
+				"\nNumber of ticks in period: " + Configuration.NUMBER_OF_TICKS_IN_PERIOD +
+				"\nStop-loss trading halt period: " + Configuration.TRADING_HALT_PERIOD +
+				"\n" + curConfigs);
 		
 		parent.mailService.sendMail("Test ttsreport", "Results: " + parent.dataHandler.totalResultsShort + "\nTotal shorts: " + 
-				parent.dataHandler.totalTradesShort + "\nBuy limit: " + Configuration.MACD_LIMIT_BUY + 
-				"\nHistogram limit: " + Configuration.MACD_HISTOGRAM_GAIN_TRESHOLD +
-				"\nSell limit: " + Configuration.MACD_LIMIT_SELL);
+				parent.dataHandler.totalTradesShort +
+				"\nMACD1: " + Configuration.MACD_EMA_1 + ", MACD2: " + Configuration.MACD_EMA_2 + ", Signal: " + Configuration.MACD_SIGNAL_LINE +
+				"\nMACD_PERIOD_TIME: " + Configuration.MACD_TIME_PERIOD +
+				"\nNumber of ticks in period: " + Configuration.NUMBER_OF_TICKS_IN_PERIOD +
+				"\nStop-loss trading halt period: " + Configuration.TRADING_HALT_PERIOD +
+				"\n" + curConfigs);
 		
 		parent.dataHandler.totalResults = 0;
 		parent.dataHandler.totalResultsShort = 0;
@@ -479,6 +521,15 @@ public class MACDAgent {
 		List<Double> signal = parent.dataHandler.historyMACD_signal.get(cur1 + cur2);
 		List<Double> limits = parent.dataHandler.max_macd_histogram.get(cur1 + cur2);
 		
+		long tradingHaltDate = new Date().getTime();
+		
+		if(Configuration.TEST)
+			tradingHaltDate = parent.dataHandler.macd_current_timestamp.get(cur1 + cur2);
+		
+		boolean tradingHaltShort = tradingHaltDate - Configuration.TRADING_HALT_PERIOD < parent.dataHandler.tradingHaltShort.get(cur1 + cur2);
+		boolean tradingHaltLong =  tradingHaltDate - Configuration.TRADING_HALT_PERIOD < parent.dataHandler.tradingHaltLong.get(cur1 + cur2);
+		boolean inertia = parent.dataHandler.inertia.get(cur1 + cur2);
+		
 		double price = prices.get(prices.size()-1);
 		
 		double multiplier = (2 / (double)(Configuration.MACD_EMA_1 + 1));
@@ -506,11 +557,20 @@ public class MACDAgent {
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Histogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
 		
 		limits.add(MACD.get(MACD.size()-1) - signal.get(signal.size()-1));
-		if(limits.size() > Configuration.MACD_LIMIT_SCOPE)
+		if(limits.size() > parent.dataHandler.macd_config_limit_scope.get(cur1 + cur2))
 			limits.remove(0);
 		
-		double limitSell = (double) Collections.max(limits) / (double) Configuration.MACD_LIMIT_SELL;
-		double limitBuy = (double) Collections.max(limits) / (double) Configuration.MACD_LIMIT_BUY;
+		double limitSell = (double) Collections.max(limits) / (double) parent.dataHandler.macd_config_limit_sell.get(cur1 + cur2);
+		double limitBuy = (double) Collections.max(limits) / (double) parent.dataHandler.macd_config_limit_buy.get(cur1 + cur2);
+		
+		if(limitBuy == 0)
+			System.out.println("hehe");
+		
+		if(price > parent.dataHandler.macd_highest_price.get(cur1 + cur2))
+			parent.dataHandler.macd_highest_price.put(cur1 + cur2, price);
+
+		if(price < parent.dataHandler.macd_lowest_price.get(cur1 + cur2))
+			parent.dataHandler.macd_lowest_price.put(cur1 + cur2, price);
 		
 		int direction = parent.dataHandler.macd_direction.get(cur1 + cur2);
 
@@ -520,10 +580,10 @@ public class MACDAgent {
 			System.out.println();
 		
 		double change  = Math.abs(limits.get(limits.size()-2) - limits.get(limits.size()-1));
-		if(direction == 1 && change / limitSell > Configuration.MACD_HISTOGRAM_GAIN_TRESHOLD)
+		if(direction == 1 && change / limitSell > parent.dataHandler.macd_config_hist_gain_treshold_sell.get(cur1 + cur2))
 			limitSell = 0;
 		
-		if(direction == 0 && change / limitBuy > Configuration.MACD_HISTOGRAM_GAIN_TRESHOLD)
+		if(direction == 0 && change / limitBuy > parent.dataHandler.macd_config_hist_gain_treshold_buy.get(cur1 + cur2))
 			limitBuy = 0;
 		
 		// Stop-loss
@@ -538,11 +598,15 @@ public class MACDAgent {
 				
 				if(!Configuration.TEST) {
 					parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "exchange market", amount, price);
+					parent.dataHandler.last_sell.put(cur1 + cur2, new Date().getTime());
+				}
+				
+				if(Configuration.TEST) {
+					parent.dataHandler.last_sell.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
 				}
 				
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				parent.dataHandler.sellChanges.put(cur1 + cur2 + "MACD", Double.toString(change));
-				parent.dataHandler.last_sell.put(cur1 + cur2, new Date().getTime());
 				
 				parent.dataHandler.macd_funds.put(cur1 + cur2,  
 						parent.dataHandler.macd_funds.get(cur1 + cur2) + (1000 * gain) - 1000);
@@ -556,6 +620,8 @@ public class MACDAgent {
 						toDate(parent.dataHandler.last_buy.get(cur1 + cur2)) +
 						"\nHistogram: " + parent.dataHandler.last_buy_histogram.get(cur1 + cur2) + ", limit: " + parent.dataHandler.last_buy_limit.get(cur1 + cur2) +
 						
+						"\nhighest: " + parent.dataHandler.macd_highest_price.get(cur1 + cur2) +
+						
 						"\nSold at " + price + " - " + 
 						(Configuration.TEST ? toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) : toDate(new Date().getTime())) +
 						"\nHistogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)) + ", limit: " + limitSell +
@@ -563,8 +629,10 @@ public class MACDAgent {
 						"\nGain: " + gain + "\n\nNew funds: " + parent.dataHandler.macd_funds.get(cur1 + cur2) + 
 						"\n\nNew total funds: " + parent.dataHandler.totalResults +
 						"\nnewTick: " + newTick;
-				if(!Configuration.TEST)
+				if(!Configuration.TEST) {
 					parent.mailService.sendMail("Trade report: MACD / " + cur1 + cur2, mailMessage);
+					parent.dataHandler.tradingHaltLong.put(cur1 + cur2, new Date().getTime());
+				}
 				else
 					parent.dataHandler.reports.put(cur1 + cur2,
 							parent.dataHandler.reports.get(cur1 + cur2) + "\n----------------\n" + mailMessage);
@@ -573,6 +641,7 @@ public class MACDAgent {
 				
 				parent.dataHandler.macd_direction.put(cur1 + cur2, -1);
 				parent.dataHandler.macd_stoploss_long.put(cur1 + cur2, true);
+				parent.dataHandler.tradingHaltLong.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
 			}
 		}
 		
@@ -601,13 +670,15 @@ public class MACDAgent {
 					
 					String mailMessage = 
 							"Stop-loss" + 
-							"\nClosed short position at " + price +
-							"\nSold at " + shortPrice + " - " + 
+							"\nClosed short position at " + price + " - " + toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) +
+							"\nSold at " + shortPrice + " - " + toDate(parent.dataHandler.last_sell.get(cur1 + cur2)) +
 							"\nGain: " + gain + "\n\nNew Margin funds: " + parent.dataHandler.macd_funds_short.get(cur1 + cur2) + 
 							"\n\nNew total margin results: " + parent.dataHandler.totalResultsShort +
 							"\nnewTick: " + newTick;
-					if(!Configuration.TEST)
+					if(!Configuration.TEST) {
 						parent.mailService.sendMail("Short trade report: MACD / " + cur1 + cur2, mailMessage);
+						parent.dataHandler.tradingHaltShort.put(cur1 + cur2, new Date().getTime());
+					}
 					else
 						parent.dataHandler.reportsShort.put(cur1 + cur2,
 								parent.dataHandler.reportsShort.get(cur1 + cur2) + "\n----------------\n" + mailMessage);
@@ -617,12 +688,14 @@ public class MACDAgent {
 				
 				parent.dataHandler.macd_direction.put(cur1 + cur2, -1);
 				parent.dataHandler.macd_stoploss_short.put(cur1 + cur2, true);
+				parent.dataHandler.tradingHaltShort.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
 			}
 
 		}
 		
 		
-		if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < - limitSell && (direction == 1 || direction == -1)) {
+		if((!inertia && (!tradingHaltShort && MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < - limitSell && (direction == 1 || direction == -1))) ||
+		(inertia && (!tradingHaltShort && MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > 0 && MACD.get(MACD.size()-1) + Math.abs(limitSell) < MACD.get(MACD.size()-2) && (direction == 1 || direction == -1)))) {
 			if(direction == 1 && !parent.dataHandler.macd_stoploss_long.get(cur1 + cur2)) {
 				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limitSell, "macd\\" + cur1 + cur2 + "macd.txt");
 
@@ -636,6 +709,7 @@ public class MACDAgent {
 						parent.restHandler_btf.placeMarketOrder(cur1, cur2, "sell", "market", shortAmount, price);
 						parent.dataHandler.short_positions.put(cur1 + cur2, shortAmount);
 						parent.dataHandler.short_positions_price.put(cur1 + cur2, price);
+						parent.dataHandler.last_sell.put(cur1 + cur2, new Date().getTime());
 					}
 				}
 				
@@ -645,12 +719,13 @@ public class MACDAgent {
 						double shortAmount = Configuration.BASE_INVESTING_AMOUNT / price;
 						parent.dataHandler.short_positions.put(cur1 + cur2, shortAmount);
 						parent.dataHandler.short_positions_price.put(cur1 + cur2, price);
+						parent.dataHandler.last_sell.put(cur1 + cur2, parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
 					}
 				}
 					
+				parent.dataHandler.macd_lowest_price.put(cur1 + cur2, price);
 				parent.dataHandler.sellPrices.put(cur1 + cur2 + "MACD", Double.toString(price));
 				parent.dataHandler.sellChanges.put(cur1 + cur2 + "MACD", Double.toString(change));
-				parent.dataHandler.last_sell.put(cur1 + cur2, new Date().getTime());
 				double gain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "MACD"));
 				gain -= 0.004;
 				
@@ -690,7 +765,8 @@ public class MACDAgent {
 			parent.dataHandler.macd_direction.put(cur1 + cur2, 0);
 			parent.dataHandler.macd_stoploss_long.put(cur1 + cur2, false);
 		}
-		else if(MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > limitBuy &&  (direction == 0 || direction == -1)) {
+		else if((!inertia && (!tradingHaltLong && MACD.get(MACD.size()-1) - signal.get(signal.size()-1) > limitBuy &&  (direction == 0 || direction == -1))) ||
+		(inertia && (!tradingHaltLong && MACD.get(MACD.size()-1) - signal.get(signal.size()-1) < 0 && MACD.get(MACD.size()-1) - limitBuy > MACD.get(MACD.size()-2) && (direction == 0 || direction == -1)))) {
 			
 			if(!parent.dataHandler.macd_stoploss_long.get(cur1 + cur2)) {
 				parent.logger.logCustom("Buy signal at " + price + "\nnewTick: " + newTick + "\nlimit: " + limitBuy, "macd\\" + cur1 + cur2 + "macd.txt");
@@ -724,9 +800,9 @@ public class MACDAgent {
 						parent.logger.logCustom("New funds: " + parent.dataHandler.macd_funds_short.get(cur1 + cur2), "macd\\" + cur1 + cur2 + "macdshort.txt");
 						
 						String mailMessage = 
-								"Closed short position at " + price +
+								"Closed short position at " + price + " - " + toDate(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2)) +
 								"\nChange: " + change +
-								"\nSold at " + shortPrice + " - " + 
+								"\nSold at " + shortPrice + " - " + toDate(parent.dataHandler.last_sell.get(cur1 + cur2)) +
 								"\nChange: " + parent.dataHandler.sellChanges.get(cur1 + cur2 + "MACD") +
 								"\nGain: " + gain + "\n\nNew Margin funds: " + parent.dataHandler.macd_funds_short.get(cur1 + cur2) + 
 								"\n\nNew total margin results: " + parent.dataHandler.totalResultsShort +
@@ -750,6 +826,7 @@ public class MACDAgent {
 				else
 					parent.dataHandler.last_buy.put(cur1 + cur2, new Date().getTime());
 				
+				parent.dataHandler.macd_highest_price.put(cur1 + cur2, price);
 				parent.dataHandler.last_buy_histogram.put(cur1 + cur2, MACD.get(MACD.size()-1) - signal.get(signal.size()-1));
 				parent.dataHandler.last_buy_limit.put(cur1 + cur2, limitBuy);
 				parent.dataHandler.macd_direction.put(cur1 + cur2, 1);
@@ -795,6 +872,7 @@ public class MACDAgent {
 		ema1Initial /= Configuration.MACD_EMA_1;
 		EMA1.add(ema1Initial);
 		
+		double limitStart = 0;
 		for(int i = 0; i < prices.size() - Configuration.MACD_EMA_1; i++) {
 			double multiplier = (2 / (double)(Configuration.MACD_EMA_1 + 1));
 			double price = prices.get(Configuration.MACD_EMA_1 + i);
@@ -856,62 +934,22 @@ public class MACDAgent {
 			signal.add(currentSignal);
 		}
 		
-		limits.add(Math.abs(MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
-		if(limits.size() > Configuration.MACD_LIMIT_SCOPE)
-			limits.remove(0);
+		
+		for(int i = EMA1.size() - 1; i > 0; i--) {
+			double ema1 = EMA1.get(i);
+			double ema2 = EMA2.get(i);
+			
+			if(ema1 - ema2 > limitStart)
+				limitStart = ema1 - ema2;
+		}
+		
+		// WTF
+		limits.add(limitStart);
 		
 		System.out.println("EMA1: " + EMA1);
 		System.out.println("EMA2: " + EMA2);
 		System.out.println("MACD: " + MACD);
 		System.out.println("Signal line: " + signal);
-		
-	}
-	
-	private void fillStopLossValues() {
-		parent.dataHandler.macd_stop_loss_limit.put("XMRUSD", 0.91);
-		parent.dataHandler.macd_stop_loss_limit_short.put("XMRUSD", 0.95);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("OMGUSD", 0.97);
-		parent.dataHandler.macd_stop_loss_limit_short.put("OMGUSD", 0.96);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("IOTUSD", 0.97);
-		parent.dataHandler.macd_stop_loss_limit_short.put("IOTUSD", 0.92);
-
-		parent.dataHandler.macd_stop_loss_limit.put("SANUSD", 0.94);
-		parent.dataHandler.macd_stop_loss_limit_short.put("SANUSD", 0.99);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("DSHUSD", 0.92);
-		parent.dataHandler.macd_stop_loss_limit_short.put("DSHUSD", 0.92);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("BCHUSD", 0.92);
-		parent.dataHandler.macd_stop_loss_limit_short.put("BCHUSD", 0.98);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("LTCUSD", 0.97);
-		parent.dataHandler.macd_stop_loss_limit_short.put("LTCUSD", 0.97);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("BTCUSD", 0.92);
-		parent.dataHandler.macd_stop_loss_limit_short.put("BTCUSD", 0.99);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("NEOUSD", 0.90);
-		parent.dataHandler.macd_stop_loss_limit_short.put("NEOUSD", 0.90);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("EOSUSD", 0.90);
-		parent.dataHandler.macd_stop_loss_limit_short.put("EOSUSD", 0.90);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("ETPUSD", 0.91);
-		parent.dataHandler.macd_stop_loss_limit_short.put("ETPUSD", 0.90);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("ZECUSD", 0.97);
-		parent.dataHandler.macd_stop_loss_limit_short.put("ZECUSD", 0.97);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("ETCUSD", 0.99);
-		parent.dataHandler.macd_stop_loss_limit_short.put("ETCUSD", 0.97);
-		
-		parent.dataHandler.macd_stop_loss_limit.put("ETHUSD", 0.97);
-		parent.dataHandler.macd_stop_loss_limit_short.put("ETHUSD", 0.97);
-
-		parent.dataHandler.macd_stop_loss_limit.put("XRPUSD", 0.97);
-		parent.dataHandler.macd_stop_loss_limit_short.put("XRPUSD", 0.97);
 		
 	}
 	

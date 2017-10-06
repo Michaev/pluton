@@ -7,10 +7,11 @@ import java.util.Map;
 
 public class Configuration {
 	
-//	public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
+	//public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
 	//public static String MODE = "simulation";					// Stage 3a - Simulate strategy
 	public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
+	//public static String MODE = "news";
 	//public static String MODE = "pluton";						// Stage 4 - let's roll
 
 	//public static String MODE = "test_mail";					// Test mail
@@ -32,7 +33,7 @@ public class Configuration {
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
 	public static boolean TEST = true;
-	public static boolean TEST_DETAILED_REPORT = false;
+	public static boolean TEST_DETAILED_REPORT = true;
 	public static boolean MARGIN_ENABLED = true;
 	
 	public static double JUMP_LIMIT = 1.003;
@@ -44,13 +45,21 @@ public class Configuration {
 	
 	public static int MACD_EMA_1 = 12;
 	public static int MACD_EMA_2 = 26;
-	public static int MACD_SIGNAL_LINE = 9;
+	public static int MACD_SIGNAL_LINE = 6;
 	//public static int MACD_TIME_PERIOD = 15 * 60000; // 15 minute periods
-	public static int MACD_TIME_PERIOD = 30 * 60000; // 15 minute periods
-	public static int MACD_LIMIT_BUY = 2;
+	public static int MACD_TIME_PERIOD = 30 * 60000; // 30 minute periods
+	//public static int MACD_TIME_PERIOD = 60 * 60000; // 60 minute periods
+	public static int MACD_LIMIT_BUY = 6;
 	public static int MACD_LIMIT_SELL = 8;
 	public static int MACD_LIMIT_SCOPE = 200;
-	public static double MACD_HISTOGRAM_GAIN_TRESHOLD = 2;
+	public static double MACD_HISTOGRAM_GAIN_TRESHOLD_BUY = 6;
+	public static double MACD_HISTOGRAM_GAIN_TRESHOLD_SELL = 2;
+	public static int NUMBER_OF_TICKS_IN_PERIOD = 5;
+	public static long TRADING_HALT_PERIOD = 0 * 60 * 60 * 1000; // No trading halt
+//	public static long TRADING_HALT_PERIOD = 3 * 60 * 60 * 1000; // 3 hour trading halt
+//	public static long TRADING_HALT_PERIOD = 6 * 60 * 60 * 1000; // 6 hour trading halt
+//	public static long TRADING_HALT_PERIOD = 9 * 60 * 60 * 1000; // 9 hour trading halt
+//	public static long TRADING_HALT_PERIOD = 12 * 60 * 60 * 1000; // 12 hour trading halt
 	
 	public static int RSI1 = 14;
 	public static int RSISTOCH1 = 14;
@@ -112,19 +121,20 @@ public class Configuration {
 	// 3. Training.
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/IOT/USD", "BTF/LTC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/NEO/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/NEO/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/EOS/USD");
-	//public static List<String> CURRENCIES = Arrays.asList("BTF/XRP/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/ETP/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/XRP/USD");
 	
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD", "BTF/BCH/USD", "BTF/ETH/USD", "BTF/LTC/USD");
 
@@ -133,26 +143,59 @@ public class Configuration {
 
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
-	public static List<String> CURRENCIES = Arrays.asList(
-			"BTF/XMR/USD",
-			"BTF/OMG/USD",
-			"BTF/IOT/USD",
-			"BTF/SAN/USD",
-			"BTF/DSH/USD", 
-			"BTF/BCH/USD", 
-			"BTF/BTC/USD", 
-			"BTF/LTC/USD", 
-			"BTF/NEO/USD", 
-			"BTF/EOS/USD", 
-			"BTF/ZEC/USD", 
-			"BTF/ETP/USD", 
-			"BTF/ETC/USD", 
-			"BTF/XRP/USD", 
-			"BTF/ETH/USD");
+//	public static List<String> CURRENCIES = Arrays.asList(
+////			"BTF/XMR/USD",
+////			"BTF/OMG/USD",
+////			"BTF/IOT/USD",
+////			"BTF/SAN/USD",
+////			"BTF/DSH/USD", 
+////			"BTF/BCH/USD", 
+////			"BTF/BTC/USD", 
+////			"BTF/LTC/USD", 
+////			"BTF/NEO/USD",
+//			"BTF/EOS/USD",
+//			"BTF/ZEC/USD", 
+////			"BTF/ETP/USD", 
+//			"BTF/ETC/USD", 
+//			"BTF/XRP/USD",
+//			"BTF/ETH/USD");
 
 	
 	// 4. Finished training.
 
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD", "BTF/IOT/USD"); // Use for real testing
 	// None
+	
+	public static List<String> NEWS_SOURCES = Arrays.asList(
+			"hacker-news|top", 
+			"the-washington-post|top",
+			"the-wall-street-journal|top",
+			"the-telegraph|top",
+			"the-new-york-times|top",
+			"the-next-web|latest",
+			"the-guardian-uk|top",
+			"the-economist|top",
+			"techcrunch|top",
+			"techradar|top",
+			"reuters|top", 
+			"recode|top",
+			"reddit-r-all|top", 
+			"new-scientist|top",
+			"mirror|top", 
+			"independent|top",
+			"fortune|top", 
+			"focus|top",
+			"financial-times|top",
+			"daily-mail|top",
+			"cnn|top",
+			"cnbc|top",
+			"buzzfeed|top",
+			"business-insider-uk|top",
+			"business-insider|top",
+			"breitbart-news|top",
+			"bloomberg|top",
+			"bbc-news|top",
+			"ars-technica|top",
+			"al-jazeera-english|top",
+			"abc-news-au|top");
 }
