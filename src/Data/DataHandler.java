@@ -46,6 +46,17 @@ public class DataHandler {
 	public Map<String, Double> macd_funds_short;
 	public Map<String, Boolean> macd_stoploss_long;
 	public Map<String, Boolean> macd_stoploss_short;
+	public Map<String, Double> current_volume;
+	public Map<String, Double> current_volume_sell;
+	
+	public Map<String, List<Double>> volume_short_term;
+	public Map<String, List<Double>> volume_long_term;
+
+	public Map<String, List<Double>> volume_short_term_sell;
+	public Map<String, List<Double>> volume_long_term_sell;
+
+	public Map<String, Double> buy_volume;
+	public Map<String, Double> buy_volume_long_term;
 	
 	public Map<String, Double> macd_stop_loss_limit;
 	public Map<String, Double> macd_stop_loss_limit_short;
@@ -121,6 +132,15 @@ public class DataHandler {
 		this.macd_funds_short = new HashMap<String, Double>();
 		this.totalResultsShort = 0;
 		this.totalTradesShort = 0;
+		this.current_volume = new HashMap<String, Double>();
+		this.current_volume_sell = new HashMap<String, Double>();
+		
+		this.volume_short_term = new HashMap<String, List<Double>>();
+		this.volume_long_term = new HashMap<String, List<Double>>();
+		this.volume_short_term_sell = new HashMap<String, List<Double>>();
+		this.volume_long_term_sell = new HashMap<String, List<Double>>();
+		this.buy_volume = new HashMap<String, Double>();
+		this.buy_volume_long_term = new HashMap<String, Double>();
 
 		this.testFinished = new HashMap<String, Boolean>();
 		this.inertia = new HashMap<String, Boolean>();

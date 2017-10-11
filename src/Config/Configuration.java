@@ -12,6 +12,7 @@ public class Configuration {
 	//public static String MODE = "simulation";					// Stage 3a - Simulate strategy
 	public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
 	//public static String MODE = "news";
+	//public static String MODE = "trend";
 	//public static String MODE = "pluton";						// Stage 4 - let's roll
 
 	//public static String MODE = "test_mail";					// Test mail
@@ -28,19 +29,23 @@ public class Configuration {
 	public static String mail = "!1Pluton67";
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
-	public static int NUMBER_OF_DAYS_BACKLOAD = 30;
+	public static int NUMBER_OF_DAYS_BACKLOAD = 10;
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
-	public static boolean TEST = true;
+	public static boolean TEST = false;
 	public static boolean TEST_DETAILED_REPORT = true;
 	public static boolean MARGIN_ENABLED = true;
+
+	public static int VOLUME_SHORT_TERM_LENGTH = 3;
+	public static int VOLUME_LONG_TERM_LENGTH = 30;
+	public static int VOLUME_TRESHOLD = 10;
 	
 	public static double JUMP_LIMIT = 1.003;
 	public static double JUMP_LIMIT_VOL = 3;
 	public static double STOP_LOSS_LIMIT = 0.97; 	// How big percentage loss before dropping
 	public static double STOP_LOSS_LIMIT_SHORT = 0.96; // tested
-	public static double ROI_GOAL = 1.04; 			// How many percentage return on investment to expect per trade
+	public static double ROI_GOAL = 1.05; 			// How many percentage return on investment to expect per trade
 	public static double SLIPPAGE_LIMIT = 1.004;
 	
 	public static int MACD_EMA_1 = 12;
@@ -48,7 +53,7 @@ public class Configuration {
 	public static int MACD_SIGNAL_LINE = 6;
 	//public static int MACD_TIME_PERIOD = 15 * 60000; // 15 minute periods
 	public static int MACD_TIME_PERIOD = 30 * 60000; // 30 minute periods
-	//public static int MACD_TIME_PERIOD = 60 * 60000; // 60 minute periods
+//	public static int MACD_TIME_PERIOD = 60 * 60000; // 60 minute periods
 	public static int MACD_LIMIT_BUY = 6;
 	public static int MACD_LIMIT_SELL = 8;
 	public static int MACD_LIMIT_SCOPE = 200;
@@ -131,7 +136,7 @@ public class Configuration {
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/EOS/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ETP/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/XRP/USD");
@@ -143,22 +148,22 @@ public class Configuration {
 
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
-//	public static List<String> CURRENCIES = Arrays.asList(
-////			"BTF/XMR/USD",
-////			"BTF/OMG/USD",
-////			"BTF/IOT/USD",
-////			"BTF/SAN/USD",
-////			"BTF/DSH/USD", 
-////			"BTF/BCH/USD", 
-////			"BTF/BTC/USD", 
-////			"BTF/LTC/USD", 
-////			"BTF/NEO/USD",
+	public static List<String> CURRENCIES = Arrays.asList(
+//			"BTF/XMR/USD",
+			"BTF/OMG/USD",
+			"BTF/IOT/USD",
+//			"BTF/SAN/USD",
+//			"BTF/DSH/USD", 
+			"BTF/BCH/USD", 
+//			"BTF/BTC/USD", 
+//			"BTF/LTC/USD", 
+//			"BTF/NEO/USD",
 //			"BTF/EOS/USD",
-//			"BTF/ZEC/USD", 
-////			"BTF/ETP/USD", 
+//			"BTF/ETH/USD", 
+//			"BTF/ETP/USD", 
 //			"BTF/ETC/USD", 
 //			"BTF/XRP/USD",
-//			"BTF/ETH/USD");
+			"BTF/ZEC/USD");
 
 	
 	// 4. Finished training.

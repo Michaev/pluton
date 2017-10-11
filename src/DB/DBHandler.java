@@ -133,6 +133,8 @@ public class DBHandler {
 			bue.printStackTrace();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
 
 		System.out.println("Trades committed: " + count);
@@ -442,6 +444,36 @@ public class DBHandler {
 		
 		try {
 			String sql = "select tid, timestamp, amount, price from history_" + cur1 + "_" + cur2 + " where timestamp > " + start + " order by timestamp asc limit " + arraySize;
+			
+			System.out.println(sql);
+			res = stm.executeQuery(sql);
+			
+			while(res.next()) {
+				JSONObject jObj = new JSONObject();
+				jObj.put("tid", res.getLong(1));
+				jObj.put("timestamp", res.getLong(2));
+				jObj.put("amount", res.getDouble(3));
+				jObj.put("price", res.getDouble(4));
+				
+				jArray.put(jObj);
+			}
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return jArray;
+	}
+	
+	public JSONArray getPriceIntervals(long start, long stop, String cur1, String cur2) {
+
+		ResultSet res;
+		JSONArray jArray = new JSONArray();
+		
+		
+		try {
+			String sql = "select tid, timestamp, amount, price from history_" + cur1 + "_" + cur2 + " where timestamp > " + start + 
+					" and timestamp < " + stop + " order by timestamp asc";
 			
 			System.out.println(sql);
 			res = stm.executeQuery(sql);

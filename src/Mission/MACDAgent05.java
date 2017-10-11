@@ -17,7 +17,7 @@ import Data.DataHandler;
 import Data.Funds;
 import Engine.Pluton;
 
-public class MACDAgent {
+public class MACDAgent05 {
 	
 	Pluton parent;
 	long startTime;
@@ -25,7 +25,7 @@ public class MACDAgent {
 	Date d;
 	int seq = 0;
 	
-	public MACDAgent(Pluton parent) {
+	public MACDAgent05(Pluton parent) {
 		this.parent = parent;
 		this.keepRunning = true;
 		d = new Date();
@@ -144,7 +144,7 @@ public class MACDAgent {
 						JSONArray jObj = (JSONArray) obj;
 						startTime = jObj.getLong(1);
 						currentPrice = jObj.getDouble(3);
-						double amount = jObj.getDouble(2);
+						double amount = jObj.getDouble(4);
 						
 						if(amount > 0) {
 							currentVolume += amount;
@@ -277,7 +277,7 @@ public class MACDAgent {
 				String cur1 = currency.split("/")[1];
 				String cur2 = currency.split("/")[2];
 				
-				if(Configuration.TEST && parent.dataHandler.testFinished.get(cur1 + cur2))
+				if(parent.dataHandler.testFinished.get(cur1 + cur2))
 					continue;
 				
 				if(parent.dataHandler.getFunds(cur1) == null)
@@ -314,7 +314,7 @@ public class MACDAgent {
 						JSONArray jObj = (JSONArray) obj;
 						startTime = jObj.getLong(1);
 						price = jObj.getDouble(3);
-						double amount = jObj.getDouble(2);
+						double amount = jObj.getDouble(4);
 						
 						if(amount > 0) {
 							currentVolume += amount;
@@ -730,10 +730,10 @@ public class MACDAgent {
 		double currentSignal = (MACD.get(MACD.size()-1) * multiplier) + (prevSignal * (1 - multiplier));
 		signal.add(currentSignal);
 		
-//		System.out.println("EMA1: " + EMA1);
-//		System.out.println("EMA2: " + EMA2);
-//		System.out.println("MACD: " + MACD);
-//		System.out.println("Signal line: " + signal);
+		System.out.println("EMA1: " + EMA1);
+		System.out.println("EMA2: " + EMA2);
+		System.out.println("MACD: " + MACD);
+		System.out.println("Signal line: " + signal);
 		
 		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Histogram: " + (MACD.get(MACD.size()-1) - signal.get(signal.size()-1)));
 		
@@ -843,7 +843,7 @@ public class MACDAgent {
 			double gain = shortPrice / price;
 			gain -= 0.004;
 			
-			if(gain < parent.dataHandler.macd_stop_loss_limit_short.get(cur1 + cur2) ) {
+			if(gain < parent.dataHandler.macd_stop_loss_limit_short.get(cur1 + cur2) || gain > Configuration.ROI_GOAL ) {
 
 				if(parent.dataHandler.short_positions.get(cur1 + cur2) != null) {
 					
