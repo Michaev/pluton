@@ -83,8 +83,8 @@ public class ConfigLoader {
 		parent.dataHandler.inertia.put("DSHUSD", false);
 		
 		// Needs tuning
-		parent.dataHandler.macd_config_limit_buy.put("BCHUSD", 15);
-		parent.dataHandler.macd_config_limit_sell.put("BCHUSD", 15);
+		parent.dataHandler.macd_config_limit_buy.put("BCHUSD", 8);
+		parent.dataHandler.macd_config_limit_sell.put("BCHUSD", 7);
 		parent.dataHandler.macd_config_limit_scope.put("BCHUSD", 50);
 		parent.dataHandler.macd_config_hist_gain_treshold_buy.put("BCHUSD", 3.0);
 		parent.dataHandler.macd_config_hist_gain_treshold_sell.put("BCHUSD", 2.0);
