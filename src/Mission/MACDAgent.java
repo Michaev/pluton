@@ -15,7 +15,9 @@ import Config.ConfigLoader;
 import Config.Configuration;
 import Data.DataHandler;
 import Data.Funds;
+import Data.RS;
 import Engine.Pluton;
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 public class MACDAgent {
 	
@@ -72,6 +74,8 @@ public class MACDAgent {
 			parent.dataHandler.macd_lowest_price.put(cur1 + cur2, 0.0);
 			parent.dataHandler.macd_highest_price.put(cur1 + cur2, 0.0);
 			
+			parent.dataHandler.resistance_list.put(cur1 + cur2, new ArrayList<RS>());
+			parent.dataHandler.support_list.put(cur1 + cur2, new ArrayList<RS>());
 			
 			if(Configuration.TEST) {
 				parent.dataHandler.getFunds().add(new Funds(cur1, 0, 0));
@@ -94,7 +98,12 @@ public class MACDAgent {
 			}
 			
 			if(Configuration.TEST) {
+				
+				int hours = (Configuration.TEST_TICKS / (Configuration.MACD_TIME_PERIOD / Configuration.NUMBER_OF_TICKS_IN_PERIOD / 60000));
+				
 				cal.add(Calendar.DATE, - Configuration.NUMBER_OF_DAYS_BACKLOAD);
+				cal.add(Calendar.HOUR, - hours);
+				
 				cal.set(Calendar.HOUR, 0);
 				cal.set(Calendar.MINUTE, 0);
 				cal.set(Calendar.SECOND, 0);
@@ -191,7 +200,7 @@ public class MACDAgent {
 						currentVolumeSell = 0;
 						seqInit++;
 						
-						if(seqInit > 50)
+						if(seqInit > Configuration.TEST_TICKS)
 							break;
 					}
 				}
@@ -202,7 +211,7 @@ public class MACDAgent {
 					e.printStackTrace();
 				}
 				
-			} while ((!Configuration.TEST && jArray.length() % 1000 == 0) || (Configuration.TEST && seqInit < 50));
+			} while ((!Configuration.TEST && jArray.length() % 1000 == 0) || (Configuration.TEST && seqInit < Configuration.TEST_TICKS));
 			
 			for(double close: closingPrices) {
 				
@@ -246,8 +255,12 @@ public class MACDAgent {
 				e.printStackTrace();
 			}
 			
-			initializeEMAs(cur1, cur2);
+			if(Configuration.MACD_ENABLED) {
+				initializeEMAs(cur1, cur2);
+			}
+			
 			//initializeRSI(cur1, cur2);
+			
 			
 			System.out.println(cur1 + "/" + cur2 + " list initiated as: " + parent.dataHandler.historyMACD_prices.get(cur1 + cur2));
 		}
@@ -310,7 +323,7 @@ public class MACDAgent {
 				
 				for(Object obj: jArray) {
 					
-					if(!Configuration.TEST) {
+					if(!Configuration.TEST && obj.getClass().isInstance(new JSONArray())) {
 						JSONArray jObj = (JSONArray) obj;
 						startTime = jObj.getLong(1);
 						price = jObj.getDouble(3);
@@ -373,8 +386,15 @@ public class MACDAgent {
 					currentVolumeSell = 0;
 				}
 
-				calculateEMAs(cur1, cur2, newTick);
+				if(Configuration.MACD_ENABLED) {
+					calculateEMAs(cur1, cur2, newTick);
+				}
+				
 				//calculateRSI(cur1, cur2, newTick);
+				
+				if(Configuration.RS_ENABLED) {
+					analyzeSupportResistance(cur1, cur2, newTick);
+				}
 				
 				if(Configuration.TEST) {
 					parent.dataHandler.macd_current_timestamp.put(cur1 + cur2,
@@ -387,13 +407,13 @@ public class MACDAgent {
 					
 				}
 				
-				if(newTick) {
+				if(newTick && parent.dataHandler.historyMACD_prices.get(cur1 + cur2).size() > Configuration.SR_LENGTH) {
 					parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(0);
 				}
 				else {
 					parent.dataHandler.historyMACD_prices.get(cur1 + cur2).remove(parent.dataHandler.historyMACD_prices.get(cur1 + cur2).size() - 1);
 				}
-			}			
+			}	
 			
 			System.out.println("Last trade: " + toDate(endDate));
 			
@@ -414,7 +434,20 @@ public class MACDAgent {
 			
 		}
 		
-		if(Configuration.TEST && Configuration.TEST_DETAILED_REPORT) {
+		if(Configuration.RS_ENABLED && Configuration.TEST) {	
+			for(String cur: Configuration.CURRENCIES) {
+				String cur1 = cur.split("/")[1];
+				String cur2 = cur.split("/")[2];
+				
+				String message = "Resistance / Support: " + cur1 + cur2 + "\n\n" + 
+						"Resistance: " + parent.dataHandler.resistance_list.get(cur1 + cur2) + "\n\n" + 
+						"Support: "  + parent.dataHandler.support_list.get(cur1 + cur2);
+				
+				parent.mailService.sendMail("Test Resistance / Support, " + cur1 + cur2, message);
+			}
+		}
+		
+		if(Configuration.TEST && Configuration.TEST_DETAILED_REPORT && Configuration.MACD_ENABLED) {
 			for(String key: parent.dataHandler.reports.keySet()) {
 				String message = parent.dataHandler.reports.get(key);
 				
@@ -428,6 +461,7 @@ public class MACDAgent {
 				
 				parent.mailService.sendMail("Test STreport: MACD / " + key, message);
 			}
+			
 		}
 		
 		String curConfigs = "";
@@ -446,21 +480,23 @@ public class MACDAgent {
 			curConfigs += "stop-loss short: " + parent.dataHandler.macd_stop_loss_limit_short.get(cur1 + cur2) + "\n";
 		}
 		
-		parent.mailService.sendMail("Test ttreport", "Results: " + parent.dataHandler.totalResults + "\nTotal trades: " + 
-				parent.dataHandler.totalTrades +
-				"\nMACD1: " + Configuration.MACD_EMA_1 + ", MACD2: " + Configuration.MACD_EMA_2 + ", Signal: " + Configuration.MACD_SIGNAL_LINE +
-				"\nMACD_PERIOD_TIME: " + Configuration.MACD_TIME_PERIOD +
-				"\nNumber of ticks in period: " + Configuration.NUMBER_OF_TICKS_IN_PERIOD +
-				"\nStop-loss trading halt period: " + Configuration.TRADING_HALT_PERIOD +
-				"\n" + curConfigs);
-		
-		parent.mailService.sendMail("Test ttsreport", "Results: " + parent.dataHandler.totalResultsShort + "\nTotal shorts: " + 
-				parent.dataHandler.totalTradesShort +
-				"\nMACD1: " + Configuration.MACD_EMA_1 + ", MACD2: " + Configuration.MACD_EMA_2 + ", Signal: " + Configuration.MACD_SIGNAL_LINE +
-				"\nMACD_PERIOD_TIME: " + Configuration.MACD_TIME_PERIOD +
-				"\nNumber of ticks in period: " + Configuration.NUMBER_OF_TICKS_IN_PERIOD +
-				"\nStop-loss trading halt period: " + Configuration.TRADING_HALT_PERIOD +
-				"\n" + curConfigs);
+		if(Configuration.MACD_ENABLED) {
+			parent.mailService.sendMail("Test ttreport", "Results: " + parent.dataHandler.totalResults + "\nTotal trades: " + 
+					parent.dataHandler.totalTrades +
+					"\nMACD1: " + Configuration.MACD_EMA_1 + ", MACD2: " + Configuration.MACD_EMA_2 + ", Signal: " + Configuration.MACD_SIGNAL_LINE +
+					"\nMACD_PERIOD_TIME: " + Configuration.MACD_TIME_PERIOD +
+					"\nNumber of ticks in period: " + Configuration.NUMBER_OF_TICKS_IN_PERIOD +
+					"\nStop-loss trading halt period: " + Configuration.TRADING_HALT_PERIOD +
+					"\n" + curConfigs);
+			
+			parent.mailService.sendMail("Test ttsreport", "Results: " + parent.dataHandler.totalResultsShort + "\nTotal shorts: " + 
+					parent.dataHandler.totalTradesShort +
+					"\nMACD1: " + Configuration.MACD_EMA_1 + ", MACD2: " + Configuration.MACD_EMA_2 + ", Signal: " + Configuration.MACD_SIGNAL_LINE +
+					"\nMACD_PERIOD_TIME: " + Configuration.MACD_TIME_PERIOD +
+					"\nNumber of ticks in period: " + Configuration.NUMBER_OF_TICKS_IN_PERIOD +
+					"\nStop-loss trading halt period: " + Configuration.TRADING_HALT_PERIOD +
+					"\n" + curConfigs);
+		}
 		
 		parent.dataHandler.totalResults = 0;
 		parent.dataHandler.totalResultsShort = 0;
@@ -468,167 +504,137 @@ public class MACDAgent {
 		System.out.println("Finished loop");
 	}
 	
-//	private void initializeRSI(String cur1, String cur2) {
-//		double firstAvgGain = 0;
-//		double firstAvgLoss = 0;
-//
-//		List<Double> rsValues = new ArrayList<Double>();
-//		List<Double> rsiValues = new ArrayList<Double>();
-//		List<Double> rsiGains = new ArrayList<Double>();
-//		List<Double> rsiLosses = new ArrayList<Double>();
-//		List<Double> stochRsi = new ArrayList<Double>();
-//		List<Double> prices = parent.dataHandler.historyMACD_prices.get(cur1 + cur2);
-//		
-//		parent.dataHandler.historyRSValues.put(cur1 + cur2, rsValues);
-//		parent.dataHandler.historyRSIValues.put(cur1 + cur2, rsiValues);
-//		parent.dataHandler.historyRSIGain.put(cur1 + cur2, rsiGains);
-//		parent.dataHandler.historyRSILoss.put(cur1 + cur2, rsiLosses);
-//		parent.dataHandler.historyStochRSI.put(cur1 + cur2, stochRsi);
-//		
-//		parent.dataHandler.rsi_direction.put(cur1 + cur2, -1);
-//		parent.dataHandler.rsi_funds.put(cur1 + cur2, 1000.0);
-//		
-//		for(int i = 1; i < Configuration.RSI1 + 1; i++) {
-//			double gain = parent.dataHandler.historyMACD_prices.get(cur1 + cur2).get(i) - parent.dataHandler.historyMACD_prices.get(cur1 + cur2).get(i-1);
-//			double loss = 0;
-//			
-//			if(gain < 0) {
-//				loss = Math.abs(gain);
-//				firstAvgLoss += loss;
-//			}
-//			else
-//				firstAvgGain += (gain);
-//		}
-//
-//		firstAvgGain = firstAvgGain / Configuration.RSI1;
-//		firstAvgLoss = firstAvgLoss / Configuration.RSI1;
-//
-//		rsiGains.add(firstAvgGain);
-//		rsiLosses.add(firstAvgLoss);
-//		rsValues.add(firstAvgGain / firstAvgLoss);
-//
-//		System.out.println(parent.timestampToDate(new Date().getTime()) + ": First RS: " + rsValues.get(rsValues.size()-1));
-//		
-//		for(int i = Configuration.RSI1 + 1; i < prices.size(); i++) {
-//			double prevGain = rsiGains.get(i - Configuration.RSI1 - 1);
-//			double gain = prices.get(i-1) - prices.get(i-2);
-//			if(gain < 0)
-//				gain = 0;
-//			
-//			rsiGains.add(((prevGain * (Configuration.RSI1-1)) + gain) / Configuration.RSI1);
-//			
-//			double prevLoss = rsiLosses.get(i - Configuration.RSI1 - 1);
-//			double loss = prices.get(i-1) - prices.get(i-2);
-//			if(loss > 0)
-//				loss = 0;
-//			
-//			loss = Math.abs(loss);
-//			
-//			rsiLosses.add(((prevLoss * (Configuration.RSI1-1)) + loss) / Configuration.RSI1);
-//			
-//			rsValues.add(rsiGains.get(rsiGains.size() - 1) / rsiLosses.get(rsiLosses.size() - 1));
-//			rsiValues.add(100 - (100/(1 + rsValues.get(rsValues.size() - 1))));
-//			
-//			System.out.println("New RS: " + rsValues.get(rsValues.size() - 1));
-//			System.out.println("New RSI: " + rsiValues.get(rsiValues.size() - 1));
-//			
-//			double lowestRSI = getEdgeRSI(cur1, cur2, 0);
-//			double highestRSI = getEdgeRSI(cur1, cur2, 1);
-//			
-//			double stochRSI = ((rsiValues.get(rsiValues.size()-1) - lowestRSI) / (highestRSI - lowestRSI)) * 100;
-//			stochRsi.add(stochRSI);
-//			
-//			double stochSMA = getSMA(stochRsi, Configuration.RSISTOCH2);
-//			
-//			System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI: " + stochRSI);
-//			System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI SMA: " + stochSMA);
-//		}
-//	}
-//	
-//	private void calculateRSI(String cur1, String cur2, boolean newTick) {
-//		List<Double> prices = parent.dataHandler.historyMACD_prices.get(cur1 + cur2);
-//		List<Double> rsiGains = parent.dataHandler.historyRSIGain.get(cur1 + cur2);
-//		List<Double> rsiLosses = parent.dataHandler.historyRSILoss.get(cur1 + cur2);
-//		List<Double> rsValues = parent.dataHandler.historyRSValues.get(cur1 + cur2);
-//		List<Double> rsiValues = parent.dataHandler.historyRSIValues.get(cur1 + cur2);
-//		List<Double> stochRsiValues = parent.dataHandler.historyStochRSI.get(cur1 + cur2);
-//		double price = prices.get(prices.size()-1);
-//		
-//		double prevGain = rsiGains.get(rsiGains.size()-1);
-//		double gain = prices.get(prices.size()-1) - prices.get(prices.size()-2);
-//		if(gain < 0)
-//			gain = 0;
-//		
-//		rsiGains.add(((prevGain * (Configuration.RSI1-1)) + gain) / Configuration.RSI1);
-//		
-//		double prevLoss = rsiLosses.get(rsiLosses.size()-1);
-//		double loss = prices.get(prices.size()-1) - prices.get(prices.size()-2);
-//		if(loss > 0)
-//			loss = 0;
-//		
-//		loss = Math.abs(loss);
-//		
-//		rsiLosses.add(((prevLoss * (Configuration.RSI1-1)) + loss) / Configuration.RSI1);
-//		
-//		rsValues.add(rsiGains.get(rsiGains.size() - 1) / rsiLosses.get(rsiLosses.size() - 1));
-//		rsiValues.add(100 - (100/(1 + rsValues.get(rsValues.size() - 1))));
-//		
-//		System.out.println(parent.timestampToDate(new Date().getTime()) + ": RS: " + (rsValues.get(rsValues.size() -1)));
-//		System.out.println(parent.timestampToDate(new Date().getTime()) + ": RSI: " + (rsiValues.get(rsiValues.size() -1)));
-//		
-//		double lowestRSI = getEdgeRSI(cur1, cur2, 0);
-//		double highestRSI = getEdgeRSI(cur1, cur2, 1);
-//		
-//		double stochRSI = ((rsiValues.get(rsiValues.size()-1) - lowestRSI) / (highestRSI - lowestRSI)) * 100;
-//		stochRsiValues.add(stochRSI);
-//		
-//		double stochSMA = getSMA(stochRsiValues, Configuration.RSISTOCH2);
-//		
-//		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI: " + stochRSI);
-//		System.out.println(parent.timestampToDate(new Date().getTime()) + ": Stoch RSI SMA: " + stochSMA);
-//		
-//		int direction = parent.dataHandler.rsi_direction.get(cur1 + cur2);
-//		if(stochRSI > stochSMA && (direction == 1 || direction == -1)) {
-//			
-//			if(direction == 1) {
-//				parent.logger.logCustom("Sell signal at " + price + "\nnewTick: " + newTick,  "rsi\\" + cur1 + cur2 + "rsi.txt");
-//				parent.dataHandler.sellPrices.put(cur1 + cur2 + "RSI", Double.toString(price));
-//				double tradeGain = price / Double.parseDouble(parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI"));
-//				tradeGain -= 0.004;
-//				
-//				parent.dataHandler.rsi_funds.put(cur1 + cur2,  
-//						parent.dataHandler.rsi_funds.get(cur1 + cur2) + (1000 * tradeGain) - 1000);
-//
-//				parent.dataHandler.totalResults += (1000 * gain) - 1000;
-//				
-//				parent.logger.logCustom("New funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2), "rsi\\" + cur1 + cur2 + "rsi.txt");
-//				
-//				String mailMessage = "Bought at " + parent.dataHandler.buyPrices.get(cur1 + cur2 + "RSI") + "\nSold at " + price + 
-//						"\nGain: " + tradeGain + "\n\nNew funds: " + parent.dataHandler.rsi_funds.get(cur1 + cur2) + 
-//						 "\n\nNew total funds: " + parent.dataHandler.totalResults +
-//						 "\nnewTick: " + newTick;
-//				parent.mailService.sendMail("Trade report: RSI / " + cur1 + cur2, mailMessage);
-//			}
-//			else
-//				System.out.println("Setting StochRSI trend for " + cur1 + cur2 + " to Down.");
-//			
-//			parent.dataHandler.rsi_direction.put(cur1 + cur2, 0);
-//		}
-//		else if(stochRSI < stochSMA && (direction == 0 || direction == -1)) {
-//			
-//			parent.logger.logCustom("Buy signal at " + price + "newTick: " + newTick,  "rsi\\" + cur1 + cur2 + "rsi.txt");
-//			parent.dataHandler.buyPrices.put(cur1 + cur2 + "RSI", Double.toString(price));
-//			parent.dataHandler.rsi_direction.put(cur1 + cur2, 1);
-//		}
-//		
-//		if(!newTick) {
-//			rsiGains.remove(rsiGains.size() -1 );
-//			rsiLosses.remove(rsiLosses.size() - 1);
-//			rsValues.remove(rsValues.size() - 1);
-//			rsiValues.remove(rsiValues.size() - 1);
-//			stochRsiValues.remove(stochRsiValues.size() - 1);
-//		}
-//	}
+	private void analyzeSupportResistance(String cur1, String cur2, boolean newTick) {
+		
+		List<Double> prices = parent.dataHandler.historyMACD_prices.get(cur1 + cur2);
+		List<RS> resistance = new ArrayList<RS>();
+		List<RS> support = new ArrayList<RS>();
+		
+		long timestamp = 0;
+		
+		if(Configuration.TEST)
+			timestamp = parent.dataHandler.macd_current_timestamp.get(cur1 + cur2);
+		else
+			timestamp = new Date().getTime();
+		
+		double low = Double.MAX_VALUE;
+		double high = 0;
+		int direction = -1;
+		double previousPrice = prices.get(0);
+		
+		int start = prices.size();
+		if(Configuration.SR_LENGTH < start)
+			start = Configuration.SR_LENGTH;
+		
+		start = prices.size() - start;
+		
+		System.out.println("Start: " + start);
+		
+		double lastPivot = -1;
+		
+		List<Double> priceSubList = prices.subList(start, prices.size()-1);
+		
+		if(timestamp >= 1508007278000L) 
+			System.out.println("hehe");
+		
+		RS currentResistance = new RS();
+		RS currentSupport = new RS(); 
+		long currentTimestamp = timestamp - ((Configuration.MACD_TIME_PERIOD) * priceSubList.size() );
+		
+		for(double price: priceSubList) {
+			
+			Date d = new Date();
+			d.setTime(currentTimestamp);
+//			System.out.println("Timestamp: " + d.toLocaleString());
+			
+			if(price < low) {
+				low = price;
+				currentSupport.setPrice(price);
+				currentSupport.setTimestamp(currentTimestamp);
+				
+				if(direction == 1) {
+					currentResistance = new RS();
+					direction = 0;
+				}
+			}
+				
+			if(price > high) {
+				high = price;
+				currentResistance.setPrice(price);
+				currentResistance.setTimestamp(currentTimestamp);
+				
+				if(direction == 0) {
+					currentSupport = new RS();
+					direction = 1;
+				}
+			}
+			
+			if(price > low * Configuration.SUPPORT_TRESHOLD) {
+
+				// Bounce? New support?
+				if(direction == 0 || direction == -1) {
+					high = price;
+					lastPivot = price;
+					if(currentSupport.getPrice() != null)
+						support.add(currentSupport);
+					currentSupport = new RS();
+					direction = 1;
+				}
+			}
+			
+			if(price * Configuration.SUPPORT_TRESHOLD < high) {
+				// Bounce? New resistance?
+				if(direction == 1 || direction == -1) {
+					low = price;
+					lastPivot = price;
+					if(currentResistance.getPrice() != null)
+						resistance.add(currentResistance);
+					currentResistance = new RS();
+					direction = 0;
+				}
+			}
+			
+			currentTimestamp += (Configuration.MACD_TIME_PERIOD);
+		}
+		
+		System.out.println("Size: " + priceSubList.size());
+		System.out.println("orig size: " + prices.size());
+		
+		System.out.println("Resistances at " + timestamp + ": " + resistance.size());
+		System.out.println("Support at " + timestamp + ": " + support.size());
+		
+		parent.dataHandler.resistance_list.put(cur1 + cur2, resistance);
+		parent.dataHandler.support_list.put(cur1 + cur2, support);
+		
+		// Finished plotting tops and bottoms. Actually analyzing.
+		
+		List<RS> line = new ArrayList<RS>();
+		
+		for(int i = resistance.size() - 1; i >= 0 - 1; i--) {
+			
+			line.add(resistance.get(i));
+			
+			for(int j = resistance.size() - 1; j >= 0 - 1; j--) {
+				
+				RS preRes = line.get(line.size() - 1);
+				RS res = resistance.get(j);
+				
+				double timeDiff = (preRes.getTimestamp() - res.getTimestamp()) / 1000.0 / 60.0 / 60.0;
+				double priceDiff = preRes.getPrice() / res.getPrice();
+				
+				priceDiff -= 1;
+				
+				double priceDiffperHour = priceDiff / timeDiff;
+				
+				System.out.println("Diff per hour from \n" +
+						preRes.getTimestamp() + ": " + preRes.getPrice() + " and \n" + 
+						res.getTimestamp() + ": " + res.getPrice() + " is \n" + 
+						priceDiffperHour);
+				
+			}
+		}
+		
+	}
 	
 	private double getSMA(List<Double> list, int length) {
 		
@@ -665,7 +671,6 @@ public class MACDAgent {
 		
 		return rsi;
 	}
-	
 	
 	private void calculateEMAs(String cur1, String cur2, boolean newTick) {
 

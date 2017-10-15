@@ -7,12 +7,11 @@ import java.util.Map;
 
 public class Configuration {
 	
-	//public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
+//	public static String MODE = "loadHistory";				// Stage 1a - poll historic data from exchange
 	//public static String MODE = "generateData";				// Stage 2 - generate data points from historic data
 	//public static String MODE = "simulation";					// Stage 3a - Simulate strategy
 	public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
 	//public static String MODE = "news";
-	//public static String MODE = "trend";
 	//public static String MODE = "pluton";						// Stage 4 - let's roll
 
 	//public static String MODE = "test_mail";					// Test mail
@@ -29,13 +28,15 @@ public class Configuration {
 	public static String mail = "!1Pluton67";
 	
 	public static int NUMBER_OF_DAYS_TRAINING = 30;
-	public static int NUMBER_OF_DAYS_BACKLOAD = 10;
+	public static int NUMBER_OF_DAYS_BACKLOAD = 5;
 	public static int NUMBER_OF_TRADES_PER_BATCH = 1000;
 	public static int NUMBER_OF_API_CALLS_MINUTE = 15;
 	public static boolean VERBOSE = true;
-	public static boolean TEST = false;
+	public static boolean TEST = true;
 	public static boolean TEST_DETAILED_REPORT = true;
 	public static boolean MARGIN_ENABLED = true;
+	public static boolean MACD_ENABLED = false;
+	public static boolean RS_ENABLED = true;
 
 	public static int VOLUME_SHORT_TERM_LENGTH = 3;
 	public static int VOLUME_LONG_TERM_LENGTH = 30;
@@ -47,6 +48,11 @@ public class Configuration {
 	public static double STOP_LOSS_LIMIT_SHORT = 0.96; // tested
 	public static double ROI_GOAL = 1.05; 			// How many percentage return on investment to expect per trade
 	public static double SLIPPAGE_LIMIT = 1.004;
+	
+	public static double SUPPORT_TRESHOLD = 1.0018;
+	public static int SR_LENGTH = 80;
+	public static int TEST_TICKS = 300;
+	public static double MAX_RS_ANGLE = 0.003; // percent per hour
 	
 	public static int MACD_EMA_1 = 12;
 	public static int MACD_EMA_2 = 26;
@@ -129,7 +135,7 @@ public class Configuration {
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/NEO/USD");
-//	public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
@@ -148,22 +154,23 @@ public class Configuration {
 
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
-	public static List<String> CURRENCIES = Arrays.asList(
-//			"BTF/XMR/USD",
-			"BTF/OMG/USD",
-			"BTF/IOT/USD",
-//			"BTF/SAN/USD",
-//			"BTF/DSH/USD", 
-			"BTF/BCH/USD", 
-//			"BTF/BTC/USD", 
-//			"BTF/LTC/USD", 
-//			"BTF/NEO/USD",
-//			"BTF/EOS/USD",
-//			"BTF/ETH/USD", 
+//	public static List<String> CURRENCIES = Arrays.asList(
+////			"BTF/XMR/USD",
+////			"BTF/OMG/USD",
+////			"BTF/IOT/USD",
+////			"BTF/SAN/USD",
+////			"BTF/DSH/USD", 
+////			"BTF/BCH/USD", 
+////			"BTF/BTC/USD",
+////			"BTF/LTC/USD", 
+////			"BTF/NEO/USD",
+////			"BTF/EOS/USD",
+////			"BTF/ETH/USD", 
+	
 //			"BTF/ETP/USD", 
 //			"BTF/ETC/USD", 
 //			"BTF/XRP/USD",
-			"BTF/ZEC/USD");
+//			"BTF/ZEC/USD");
 
 	
 	// 4. Finished training.
