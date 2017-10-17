@@ -3,15 +3,15 @@ package Data;
 import java.util.Date;
 
 // Resistance / support
-public class RS {
+public class TopBottom {
 	Double price;
 	long timestamp;
 	
-	public RS() {
+	public TopBottom() {
 		
 	}
 	
-	public RS(double price, long timestamp) {
+	public TopBottom(double price, long timestamp) {
 		this.price = price;
 		this.timestamp = timestamp;
 	}

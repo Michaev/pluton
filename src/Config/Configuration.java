@@ -12,7 +12,7 @@ public class Configuration {
 	//public static String MODE = "simulation";					// Stage 3a - Simulate strategy
 	public static String MODE = "simulation_MACD";			// Stage 3b - Simulate MACD strategy
 	//public static String MODE = "news";
-	//public static String MODE = "pluton";						// Stage 4 - let's roll
+	//public static String MODE = "pluton";						// Stage 4 
 
 	//public static String MODE = "test_mail";					// Test mail
 
@@ -43,16 +43,17 @@ public class Configuration {
 	public static int VOLUME_TRESHOLD = 10;
 	
 	public static double JUMP_LIMIT = 1.003;
-	public static double JUMP_LIMIT_VOL = 3;
+	public static double JUMP_LIMIT_VOL = 5;
 	public static double STOP_LOSS_LIMIT = 0.97; 	// How big percentage loss before dropping
 	public static double STOP_LOSS_LIMIT_SHORT = 0.96; // tested
 	public static double ROI_GOAL = 1.05; 			// How many percentage return on investment to expect per trade
 	public static double SLIPPAGE_LIMIT = 1.004;
 	
-	public static double SUPPORT_TRESHOLD = 1.0018;
+	public static double SUPPORT_TRESHOLD = 1.001;
 	public static int SR_LENGTH = 80;
 	public static int TEST_TICKS = 300;
-	public static double MAX_RS_ANGLE = 0.003; // percent per hour
+	public static double MAX_RS_ANGLE = 0.008; // percent per hour
+	public static double RS_SENSITIVITY = 0.003;
 	
 	public static int MACD_EMA_1 = 12;
 	public static int MACD_EMA_2 = 26;
@@ -135,13 +136,13 @@ public class Configuration {
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/NEO/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ETC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/SAN/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
-//	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/EOS/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ETP/USD");

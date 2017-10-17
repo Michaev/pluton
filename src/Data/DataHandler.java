@@ -49,8 +49,8 @@ public class DataHandler {
 	public Map<String, Double> current_volume;
 	public Map<String, Double> current_volume_sell;
 	
-	public Map<String, List<RS>> resistance_list;
-	public Map<String, List<RS>> support_list;
+	public Map<String, List<TopBottom>> resistance_list;
+	public Map<String, List<TopBottom>> support_list;
 	
 	public Map<String, List<Double>> volume_short_term;
 	public Map<String, List<Double>> volume_long_term;
@@ -137,8 +137,8 @@ public class DataHandler {
 		this.totalTradesShort = 0;
 		this.current_volume = new HashMap<String, Double>();
 		this.current_volume_sell = new HashMap<String, Double>();
-		this.resistance_list = new HashMap<String, List<RS>>();
-		this.support_list = new HashMap<String, List<RS>>();
+		this.resistance_list = new HashMap<String, List<TopBottom>>();
+		this.support_list = new HashMap<String, List<TopBottom>>();
 		
 		this.volume_short_term = new HashMap<String, List<Double>>();
 		this.volume_long_term = new HashMap<String, List<Double>>();
