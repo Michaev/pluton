@@ -52,7 +52,7 @@ public class Configuration {
 	public static double SUPPORT_TRESHOLD = 1.001;
 	public static int SR_LENGTH = 80;
 	public static int TEST_TICKS = 300;
-	public static double MAX_RS_ANGLE = 0.008; // percent per hour
+	public static double MAX_RS_ANGLE = 0.03; // percent per hour
 	public static double RS_SENSITIVITY = 0.003;
 	
 	public static int MACD_EMA_1 = 12;
@@ -133,7 +133,7 @@ public class Configuration {
 	// 3. Training.
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD", "BTF/IOT/USD", "BTF/LTC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/BTC/USD");
-//	public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
+	public static List<String> CURRENCIES = Arrays.asList("BTF/ETH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/BCH/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/NEO/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/DSH/USD");
@@ -142,7 +142,7 @@ public class Configuration {
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/IOT/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ZEC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/XMR/USD");
-	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
+//	public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/OMG/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/EOS/USD");
 //	public static List<String> CURRENCIES = Arrays.asList("BTF/ETP/USD");
@@ -156,18 +156,17 @@ public class Configuration {
 	//public static List<String> CURRENCIES = Arrays.asList("BTF/LTC/USD", "BTF/ETH/USD");
 
 //	public static List<String> CURRENCIES = Arrays.asList(
-////			"BTF/XMR/USD",
-////			"BTF/OMG/USD",
-////			"BTF/IOT/USD",
-////			"BTF/SAN/USD",
-////			"BTF/DSH/USD", 
-////			"BTF/BCH/USD", 
-////			"BTF/BTC/USD",
-////			"BTF/LTC/USD", 
-////			"BTF/NEO/USD",
-////			"BTF/EOS/USD",
-////			"BTF/ETH/USD", 
-	
+//			"BTF/XMR/USD",
+//			"BTF/OMG/USD",
+//			"BTF/IOT/USD",
+//			"BTF/SAN/USD",
+//			"BTF/DSH/USD", 
+//			"BTF/BCH/USD", 
+//			"BTF/BTC/USD",
+//			"BTF/LTC/USD", 
+//			"BTF/NEO/USD",
+//			"BTF/EOS/USD",
+//			"BTF/ETH/USD", 
 //			"BTF/ETP/USD", 
 //			"BTF/ETC/USD", 
 //			"BTF/XRP/USD",

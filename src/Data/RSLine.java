@@ -43,4 +43,8 @@ public class RSLine {
 	public int size() {
 		return plots.size();
 	}
+	
+	public String toString() {
+		return plots.toString();
+	}
 }

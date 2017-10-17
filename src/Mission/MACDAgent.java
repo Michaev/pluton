@@ -540,6 +540,7 @@ public class MACDAgent {
 		long currentTimestamp = timestamp - ((Configuration.MACD_TIME_PERIOD) * priceSubList.size() );
 		long prevTimestamp = -1;
 		double prevPrice = -1;
+		boolean first = true;
 		
 		for(double price: priceSubList) {
 			
@@ -552,8 +553,12 @@ public class MACDAgent {
 				currentSupport.setPrice(price);
 				currentSupport.setTimestamp(currentTimestamp);
 				
-				if(direction == 1) {
-					currentResistance = new TopBottom();
+//				if(direction == 1) {
+//					currentResistance = new TopBottom();
+//					direction = 0;
+//				}
+				
+				if(direction == -1 && !first) {
 					direction = 0;
 				}
 			}
@@ -563,16 +568,20 @@ public class MACDAgent {
 				currentResistance.setPrice(price);
 				currentResistance.setTimestamp(currentTimestamp);
 				
-				if(direction == 0) {
-					currentSupport = new TopBottom();
+//				if(direction == 0) {
+//					currentSupport = new TopBottom();
+//					direction = 1;
+//				}
+				
+				if(direction == -1 && !first) {
 					direction = 1;
 				}
 			}
 			
-			if(price > low * Configuration.SUPPORT_TRESHOLD) {
+			if(price > low) {
 
 				// Bounce? New support?
-				if(direction == 0 || direction == -1) {
+				if(direction == 0) {
 					high = price;
 					
 					if(currentSupport.getPrice() == null) {
@@ -586,9 +595,9 @@ public class MACDAgent {
 				}
 			}
 			
-			if(price * Configuration.SUPPORT_TRESHOLD < high) {
+			if(price < high) {
 				// Bounce? New resistance?
-				if(direction == 1 || direction == -1) {
+				if(direction == 1) {
 					low = price;
 					
 					if(currentResistance.getPrice() == null)  {
@@ -605,6 +614,8 @@ public class MACDAgent {
 			prevPrice = price;
 			prevTimestamp = currentTimestamp;
 			currentTimestamp += (Configuration.MACD_TIME_PERIOD);
+			
+			first = false;
 		}
 		
 		System.out.println("Size: " + priceSubList.size());
@@ -617,50 +628,81 @@ public class MACDAgent {
 		parent.dataHandler.support_list.put(cur1 + cur2, support);
 		
 		
-		//
-		// Finished plotting tops and bottoms. Actually analyzing.
-		//
-		//
-		
-		
-//		RSLine line = new RSLine();
-//		line.setPlots(new ArrayList<TopBottom>());
 //		
-//		double currentAngle = 0;
+//		 Finished plotting tops and bottoms. Actually analyzing.
 //		
-//		for(int i = resistance.size() - 1; i >= 0; i--) {
-//			
-//			line.add(resistance.get(i));
-//			
-//			for(int j = i - 1; j >= 0; j--) {
-//				
-//				TopBottom preRes = line.getPlots().get(line.size() - 1);
-//				TopBottom res = resistance.get(j);
-//				
-//				double timeDiff = (preRes.getTimestamp() - res.getTimestamp()) / 1000.0 / 60.0 / 60.0;
-//				double priceDiff = preRes.getPrice() / res.getPrice();
-//				
-//				priceDiff -= 1;
-//				
-//				double priceDiffperHour = priceDiff / timeDiff;
-//				
+//		
+//		
+		
+		double currentAngle = 0;
+		
+		for(int i = resistance.size() - 1; i >= resistance.size() - 3; i--) {
+			
+			RSLine line = new RSLine();
+			line.setPlots(new ArrayList<TopBottom>());
+			line.add(resistance.get(i));
+			
+			System.out.println("First plot: " + resistance.get(i).getPrice() + " at " + toDate(resistance.get(i).getTimestamp()));
+			
+			for(int j = i - 1; j >= 0; j--) {
+				
+				TopBottom preRes = line.getPlots().get(line.size() - 1);
+				TopBottom res = resistance.get(j);
+				
+				double timeDiff = (preRes.getTimestamp() - res.getTimestamp()) / (1000.0 * 60.0 * 60.0);
+				double priceDiff = preRes.getPrice() / res.getPrice();
+				
+				priceDiff -= 1;
+				
+				double priceDiffperHour = priceDiff / timeDiff;
+				
+				
 //				System.out.println("Diff per hour from \n" +
 //						preRes.getTimestamp() + ": " + preRes.getPrice() + " and \n" + 
 //						res.getTimestamp() + ": " + res.getPrice() + " is \n" + 
 //						priceDiffperHour);
-//				
-//				if(line.size() > 1) {
-//					double timeSinceLastTop = (preRes.getTimestamp() - res.getTimestamp()) / (1000.0 / 60.0 / 60.0);
-//					double plot = preRes.getPrice() * (1 + (timeSinceLastTop * currentAngle));
-//				}
-//				
-//				if(priceDiffperHour < Configuration.MAX_RS_ANGLE) {
-//					line.add(res);
-//					currentAngle = priceDiffperHour;
-//					line.setAngle(currentAngle);
-//				}
-//			}
-//		}
+				
+				if(line.size() < 2) {
+					line.add(res);
+					currentAngle = priceDiffperHour;
+					line.setAngle(currentAngle);
+					continue;
+				} else
+					currentAngle = line.getAngle();
+				
+				double plot = preRes.getPrice() * (1 + (timeDiff * currentAngle));
+				
+				System.out.println("Price: " + res.getPrice() + " at " + parent.timestampToDate(res.getTimestamp()));
+				System.out.println("Line: " + plot + ", angle: " + currentAngle);
+
+				if(plot * (1 + Configuration.RS_SENSITIVITY) > res.getPrice())  {
+					// Over top
+					
+					if(plot < res.getPrice() * (1 + Configuration.RS_SENSITIVITY)) {
+						System.out.println("sufficiently close to top - add to line");
+						
+						line.add(res);
+						
+					} else {
+						System.out.println("Too far over top - move on to next plot");
+						continue;
+					}
+				} else {
+					System.out.println("Plot intersecting with earlier price - abort");
+					line.removeLast();
+					line.add(res);
+					currentAngle = priceDiffperHour;
+					line.setAngle(currentAngle);
+				}
+				
+			}
+			
+			System.out.println();
+			System.out.println("Line size: " + line.size() + " ------------");
+			System.out.println(line.toString());
+			System.out.println();
+			
+		}
 		
 	}
 	
