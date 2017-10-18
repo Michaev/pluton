@@ -54,6 +54,7 @@ public class Configuration {
 	public static int TEST_TICKS = 300;
 	public static double MAX_RS_ANGLE = 0.03; // percent per hour
 	public static double RS_SENSITIVITY = 0.003;
+	public static long TICK_POLISH = 1800000;
 	
 	public static int MACD_EMA_1 = 12;
 	public static int MACD_EMA_2 = 26;

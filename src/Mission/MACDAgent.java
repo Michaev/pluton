@@ -118,6 +118,8 @@ public class MACDAgent {
 			List<Double> volumesSell = new ArrayList<Double>();
 			List<Double> volumesShortSell = new ArrayList<Double>();
 			// Get enough data for the MACD, according to the MACD strategy
+			
+			cal.set(Calendar.MINUTE, 0);
 			startTime = cal.getTimeInMillis();
 			
 			int seqInit = 0;
@@ -206,6 +208,10 @@ public class MACDAgent {
 					}
 				}
 				
+				Date tempDate = new Date(parent.dataHandler.macd_current_timestamp.get(cur1 + cur2));
+				tempDate.setMinutes(0);
+				parent.dataHandler.macd_current_timestamp.put(cur1 + cur2, tempDate.getTime());
+				
 				try {
 					Thread.sleep(60000 / Configuration.NUMBER_OF_API_CALLS_MINUTE);
 				} catch (InterruptedException e) {
@@ -266,11 +272,21 @@ public class MACDAgent {
 			System.out.println(cur1 + "/" + cur2 + " list initiated as: " + parent.dataHandler.historyMACD_prices.get(cur1 + cur2));
 		}
 		
-		double startDate = new Date().getTime();
+		Date startD = new Date();
+		if(startD.getMinutes() > 30) {
+			startD.setHours(startD.getHours());
+			startD.setMinutes(0);
+		} else {
+			startD.setMinutes(30);
+		}
+		
+		double startDate = startD.getTime();
 		long endDate = -1;
 		
 		while(keepRunning) {
 			d = new Date();
+			d.setMinutes(0);
+			Date delay = new Date();
 			
 			if(!Configuration.TEST) {
 				parent.dataHandler.loadFunds();
@@ -418,7 +434,7 @@ public class MACDAgent {
 			
 			System.out.println("Last trade: " + toDate(endDate));
 			
-			long sleepTime = (Configuration.MACD_TIME_PERIOD / Configuration.NUMBER_OF_TICKS_IN_PERIOD ) - (new Date().getTime() - d.getTime());
+			long sleepTime = (Configuration.MACD_TIME_PERIOD / Configuration.NUMBER_OF_TICKS_IN_PERIOD ) - (new Date().getTime() - delay.getTime());
 			
 			if(Configuration.TEST)
 				sleepTime = 0;
@@ -518,10 +534,6 @@ public class MACDAgent {
 		else
 			timestamp = new Date().getTime();
 		
-		double low = Double.MAX_VALUE;
-		double high = 0;
-		int direction = -1;
-		
 		int start = prices.size();
 		if(Configuration.SR_LENGTH < start)
 			start = Configuration.SR_LENGTH;
@@ -532,15 +544,13 @@ public class MACDAgent {
 		
 		List<Double> priceSubList = prices.subList(start, prices.size()-1);
 		
-		if(timestamp >= 1508007278000L) 
-			System.out.println("hehe");
-		
 		TopBottom currentResistance = new TopBottom();
 		TopBottom currentSupport = new TopBottom(); 
 		long currentTimestamp = timestamp - ((Configuration.MACD_TIME_PERIOD) * priceSubList.size() );
 		long prevTimestamp = -1;
 		double prevPrice = -1;
 		boolean first = true;
+		boolean down = false;
 		
 		for(double price: priceSubList) {
 			
@@ -548,69 +558,55 @@ public class MACDAgent {
 			d.setTime(currentTimestamp);
 //			System.out.println("Timestamp: " + d.toLocaleString());
 			
-			if(price < low) {
-				low = price;
+			if(first) {
+				prevPrice = price;
+				first = false;
+				continue;
+			}
+			
+			if(price < prevPrice) {
 				currentSupport.setPrice(price);
 				currentSupport.setTimestamp(currentTimestamp);
-				
-//				if(direction == 1) {
-//					currentResistance = new TopBottom();
-//					direction = 0;
-//				}
-				
-				if(direction == -1 && !first) {
-					direction = 0;
-				}
+				down = true;
+			} else if(price > prevPrice && down) {
+				support.add(currentSupport);
+				currentSupport = new TopBottom();
+				down = false;
 			}
 				
-			if(price > high) {
-				high = price;
+			prevPrice = price;
+			prevTimestamp = currentTimestamp;
+			currentTimestamp += (Configuration.MACD_TIME_PERIOD);
+			
+			first = false;
+		}
+		
+		boolean up = false;
+		first = true;
+		currentTimestamp = timestamp - ((Configuration.MACD_TIME_PERIOD) * priceSubList.size() );
+		
+		for(double price: priceSubList) {
+			
+			Date d = new Date();
+			d.setTime(currentTimestamp);
+//			System.out.println("Timestamp: " + d.toLocaleString());
+			
+			if(first) {
+				prevPrice = price;
+				first = false;
+				continue;
+			}
+			
+			if(price > prevPrice) {
 				currentResistance.setPrice(price);
 				currentResistance.setTimestamp(currentTimestamp);
+				up = true;
+			} else if(price < prevPrice && up) {
+				resistance.add(currentResistance);
+				currentResistance = new TopBottom();
+				up = false;
+			}
 				
-//				if(direction == 0) {
-//					currentSupport = new TopBottom();
-//					direction = 1;
-//				}
-				
-				if(direction == -1 && !first) {
-					direction = 1;
-				}
-			}
-			
-			if(price > low) {
-
-				// Bounce? New support?
-				if(direction == 0) {
-					high = price;
-					
-					if(currentSupport.getPrice() == null) {
-						currentSupport.setPrice(prevPrice);
-						currentSupport.setTimestamp(prevTimestamp);
-					}
-					
-					support.add(currentSupport);
-					currentSupport = new TopBottom();
-					direction = 1;
-				}
-			}
-			
-			if(price < high) {
-				// Bounce? New resistance?
-				if(direction == 1) {
-					low = price;
-					
-					if(currentResistance.getPrice() == null)  {
-						currentResistance.setPrice(price);
-						currentResistance.setTimestamp(currentTimestamp);
-					}
-					
-					resistance.add(currentResistance);
-					currentResistance = new TopBottom();
-					direction = 0;
-				}
-			}
-			
 			prevPrice = price;
 			prevTimestamp = currentTimestamp;
 			currentTimestamp += (Configuration.MACD_TIME_PERIOD);
@@ -650,9 +646,7 @@ public class MACDAgent {
 				TopBottom res = resistance.get(j);
 				
 				double timeDiff = (preRes.getTimestamp() - res.getTimestamp()) / (1000.0 * 60.0 * 60.0);
-				double priceDiff = preRes.getPrice() / res.getPrice();
-				
-				priceDiff -= 1;
+				double priceDiff = preRes.getPrice() - res.getPrice();
 				
 				double priceDiffperHour = priceDiff / timeDiff;
 				
@@ -662,19 +656,26 @@ public class MACDAgent {
 //						res.getTimestamp() + ": " + res.getPrice() + " is \n" + 
 //						priceDiffperHour);
 				
+				System.out.println("Line length: " + line.size());
+				System.out.println("Price: " + res.getPrice() + " at " + parent.timestampToDate(res.getTimestamp()));
+				
 				if(line.size() < 2) {
 					line.add(res);
 					currentAngle = priceDiffperHour;
 					line.setAngle(currentAngle);
+					System.out.println("Angle: " + currentAngle);
 					continue;
 				} else
 					currentAngle = line.getAngle();
+
+				double plot = preRes.getPrice()+ (timeDiff * (-currentAngle));
 				
-				double plot = preRes.getPrice() * (1 + (timeDiff * currentAngle));
-				
-				System.out.println("Price: " + res.getPrice() + " at " + parent.timestampToDate(res.getTimestamp()));
 				System.out.println("Line: " + plot + ", angle: " + currentAngle);
 
+				if(res.getPrice() == 308.66) {
+					System.out.println("hehe");
+				}
+				
 				if(plot * (1 + Configuration.RS_SENSITIVITY) > res.getPrice())  {
 					// Over top
 					
@@ -690,9 +691,14 @@ public class MACDAgent {
 				} else {
 					System.out.println("Plot intersecting with earlier price - abort");
 					line.removeLast();
-					line.add(res);
-					currentAngle = priceDiffperHour;
-					line.setAngle(currentAngle);
+					
+					if(priceDiffperHour > currentAngle) {
+						break;
+					} else {
+						line.add(res);
+						currentAngle = priceDiffperHour;
+						line.setAngle(currentAngle);
+					}
 				}
 				
 			}
